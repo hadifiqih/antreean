@@ -104,7 +104,7 @@
                                     </div>
                                     <div class="form-check">
                                         <input type="checkbox" name="offers[{{ $index }}][is_closing]" class="form-check-input"
-                                            {{ $dailyOffer->is_closing ? 'checked' : '' }}>
+                                            {{ $dailyOffer->offer->is_closing ? 'checked' : '' }}>
                                         <label class="form-check-label">Sudah Closing</label>
                                     </div>
                                 </div>
@@ -141,7 +141,7 @@
                                         <option value="{{ $item['id'] }}"
                                             data-platform-id="{{ $item['platform']['id'] }}"
                                             data-job-name="{{ $item['job']['job_name'] }}" 
-                                            {{ $ad->ads_id == $item['id'] ? 'selected' : '' }}>
+                                            {{ isset($ad) && $ad->ads_id == $item['id'] ? 'selected' : '' }}>
                                             {{ $item['nomor_iklan'] }} - {{ $item['job']['job_name'] }} - {{ $item['platform']['platform_name'] }}
                                         </option>
                                     @endforeach
