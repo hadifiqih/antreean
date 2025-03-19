@@ -45,12 +45,21 @@ class DailySalesReportController extends Controller
     public function create()
     {
         $activityTypes = ActivityType::all();
-        $offers = Offer::where('sales_id', Auth::user()->sales->id)
-            ->where('is_closing', false)
-            ->whereDoesntHave('dailyOffers', function($query) {
-                $query->whereDate('created_at', date('Y-m-d'));
-            })
-            ->get();
+        if(Auth::user()->role !== 'sales') {
+            $offers = Offer::where('is_closing', false)
+                ->whereDoesntHave('dailyOffers', function($query) {
+                    $query->whereDate('created_at', date('Y-m-d'));
+                })
+                ->get();
+        }else{
+            
+            $offers = Offer::where('sales_id', Auth::user()->sales->id)
+                ->where('is_closing', false)
+                ->whereDoesntHave('dailyOffers', function($query) {
+                    $query->whereDate('created_at', date('Y-m-d'));
+                })
+                ->get();
+        }
 
         try {
             $client = new Client();
