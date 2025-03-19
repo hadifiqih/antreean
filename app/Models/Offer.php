@@ -9,7 +9,7 @@ class Offer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['sales_id', 'job_id', 'price', 'qty', 'total', 'platform_id', 'updates'];
+    protected $fillable = ['sales_id', 'job_id', 'price', 'qty', 'total', 'platform_id', 'updates', 'description', 'is_closing', 'is_prospect'];
 
     protected $casts = [
         'updates' => 'array'

@@ -24,7 +24,10 @@ return new class extends Migration
             $table->decimal('price', 10, 0)->default(0);
             $table->decimal('qty', 10, 0)->default(0);
             $table->decimal('total', 10, 0)->default(0);
+            $table->text('description')->nullable();
             $table->unsignedBigInteger('platform_id');
+            $table->boolean('is_closing')->default(false);
+            $table->boolean('is_prospect')->default(false);
             $table->json('updates');
             $table->timestamps();
 
@@ -37,6 +40,8 @@ return new class extends Migration
             $table->unsignedBigInteger('sales_id');
             $table->unsignedBigInteger('user_id');
             $table->decimal('omset', 10, 0)->default(0);
+            $table->text('kendala')->nullable();
+            $table->json('agenda')->nullable();
             $table->timestamps();
 
             $table->foreign('sales_id')->references('id')->on('sales');
@@ -67,8 +72,10 @@ return new class extends Migration
 
         Schema::create('ads_report', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('daily_report_id')->constrained('daily_reports');
             $table->unsignedBigInteger('sales_id');
             $table->unsignedBigInteger('platform_id');
+            $table->string('ads_id');
             $table->string('job_name');
             $table->decimal('lead_amount', 10, 0)->default(0);
             $table->decimal('total_omset', 10, 0)->default(0);
@@ -78,26 +85,6 @@ return new class extends Migration
 
             $table->foreign('sales_id')->references('id')->on('sales');
             $table->foreign('platform_id')->references('id')->on('platforms');
-        });
-
-        Schema::create('ads_problems', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('sales_id');
-            $table->unsignedBigInteger('ads_report_id');
-            $table->text('problem')->nullable();
-            $table->timestamps();
-
-            $table->foreign('ads_report_id')->references('id')->on('ads_report');
-            $table->foreign('sales_id')->references('id')->on('sales');
-        });
-
-        Schema::create('problems', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('sales_id');
-            $table->text('problem')->nullable();
-            $table->timestamps();
-
-            $table->foreign('sales_id')->references('id')->on('sales');
         });
     }
 

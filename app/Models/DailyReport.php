@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\AdsReport;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -9,7 +10,17 @@ class DailyReport extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['sales_id', 'user_id', 'omset'];
+    protected $fillable = [
+        'sales_id',
+        'user_id',
+        'omset',
+        'kendala',
+        'agendas'
+    ];
+
+    protected $casts = [
+        'agendas' => 'array'
+    ];
 
     public function sales()
     {
@@ -29,5 +40,10 @@ class DailyReport extends Model
     public function offers()
     {
         return $this->hasMany(DailyOffer::class);
+    }
+
+    public function adsReports()
+    {
+        return $this->hasMany(AdsReport::class);
     }
 }

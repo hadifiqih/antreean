@@ -18,7 +18,7 @@
 <li class="nav-item">
     <a href="{{ route('sales.offers.index') }}" class="nav-link {{ Request::is('sales/offers*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-hand-holding-usd"></i>
-        <p>Offers</p>
+        <p>Penawaran</p>
     </a>
 </li>
 
@@ -26,7 +26,7 @@
 <li class="nav-item">
     <a href="{{ route('customer.index') }}" class="nav-link {{ Request::is('master/customer*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-users"></i>
-        <p>Customers</p>
+        <p>Pelanggan</p>
     </a>
 </li>
 

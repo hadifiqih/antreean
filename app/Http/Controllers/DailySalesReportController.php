@@ -4,14 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Offer;
 use App\Models\Sales;
+use App\Models\Antrian;
 use App\Models\DailyOffer;
-use App\Models\ActivityType;
 use App\Models\DailyReport;
-use App\Models\DailyActivity;
+use App\Models\ActivityType;
 use Illuminate\Http\Request;
+use App\Models\DailyActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\DailyReportRequest;
+use GuzzleHttp\Client;
+use App\Models\AdsReport;
 
 class DailySalesReportController extends Controller
 {
@@ -35,20 +38,44 @@ class DailySalesReportController extends Controller
     {
         $activityTypes = ActivityType::all();
         $offers = Offer::where('sales_id', Auth::user()->sales->id)
-            ->whereDoesntHave('dailyOffers')
+            ->where('is_closing', false)
+            ->whereDoesntHave('dailyOffers', function($query) {
+                $query->whereDate('created_at', date('Y-m-d'));
+            })
             ->get();
+
+        try {
+            $client = new Client();
+            $response = $client->request('GET', config('services.api_url_antrian') . '/api/ads/sales/' . Auth::user()->sales->id, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . env('API_TOKEN')
+                ]
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                $ads = json_decode($response->getBody(), true);
+            } else {
+                $ads = [];
+                \Log::error('Failed to fetch ads: ' . $response->getBody());
+            }
+        } catch (\Exception $e) {
+            $ads = [];
+            \Log::error('Exception occurred while fetching ads: ' . $e->getMessage());
+        }
         
-        return view('sales.reports.create', compact('activityTypes', 'offers'));
+        return view('sales.reports.create', compact('activityTypes', 'offers', 'ads'));
     }
 
-    public function store(DailyReportRequest $request)
+    public function store(Request $request)
     {
         DB::beginTransaction();
         try {
             $report = DailyReport::create([
                 'sales_id' => Auth::user()->sales->id,
                 'user_id' => Auth::id(),
-                'omset' => $request->omset
+                'omset' => $request->omset,
+                'kendala' => $request->kendala ?? null,
+                'agendas' => $request->agendas ? array_map('trim', explode(',', $request->agendas)) : null
             ]);
 
             // Store activities
@@ -64,11 +91,37 @@ class DailySalesReportController extends Controller
             // Store offers
             if ($request->has('offers')) {
                 foreach ($request->offers as $offer) {
+                    $updates = isset($offer['updates']) ? explode(',', $offer['updates']) : null;
+                    
                     DailyOffer::create([
                         'daily_report_id' => $report->id,
                         'offer_id' => $offer['id'],
-                        'is_prospect' => $offer['is_prospect'] ?? false,
-                        'updates' => $offer['updates'] ?? null
+                        'is_prospect' => isset($offer['is_prospect']) ? true : false,
+                        'is_closing' => isset($offer['is_closing']) ? true : false,
+                        'updates' => $updates
+                    ]);
+
+                    // Update the corresponding offer with the updates
+                    Offer::where('id', $offer['id'])->update([
+                        'updates' => $updates,
+                        'is_closing' => isset($offer['is_closing']) ? true : false,
+                        'is_prospect' => isset($offer['is_prospect']) ? true : false
+                    ]);
+                }
+            }
+
+            // Store ads reports
+            if ($request->has('ads')) {
+                foreach ($request->ads as $index => $adsData) {
+                    AdsReport::create([
+                        'daily_report_id' => $report->id,
+                        'ads_id' => $adsData['ads_id'],
+                        'platform_id' => $adsData['platform_id'],
+                        'job_name' => $adsData['job_name'],
+                        'lead_amount' => $adsData['lead_amount'] ?? 0,
+                        'total_omset' => $adsData['total_omset'] ?? 0,
+                        'analisa' => $adsData['analisa'] ?? null,
+                        'kendala' => $adsData['kendala'] ?? null,
                     ]);
                 }
             }
@@ -85,7 +138,11 @@ class DailySalesReportController extends Controller
     public function show(DailyReport $report)
     {
         $report->load(['activities.activityType', 'offers.offer']);
-        return view('sales.reports.show', compact('report'));
+        $antrians = Antrian::with(['job'])->where('sales_id', Auth::user()->sales->id)
+            ->whereDate('created_at', $report->created_at->format('Y-m-d'))
+            ->get();
+            
+        return view('sales.reports.show', compact('report', 'antrians'));
     }
 
     public function edit(DailyReport $report)
@@ -96,16 +153,39 @@ class DailySalesReportController extends Controller
                 $query->where('daily_report_id', '!=', $report->id);
             })
             ->get();
+            
+        $adsReports = $report->adsReports()->get();
+
+        try {
+            $client = new Client();
+            $response = $client->request('GET', config('services.api_url_antrian') . '/api/ads/sales/' . Auth::user()->sales->id, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . env('API_TOKEN')
+                ]
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                $ads = json_decode($response->getBody(), true);
+            } else {
+                $ads = [];
+                \Log::error('Failed to fetch ads: ' . $response->getBody());
+            }
+        } catch (\Exception $e) {
+            $ads = [];
+            \Log::error('Exception occurred while fetching ads: ' . $e->getMessage());
+        }
         
-        return view('sales.reports.edit', compact('report', 'activityTypes', 'offers'));
+        return view('sales.reports.edit', compact('report', 'activityTypes', 'offers', 'ads', 'adsReports'));
     }
 
-    public function update(DailyReportRequest $request, DailyReport $report)
+    public function update(Request $request, DailyReport $report)
     {
         DB::beginTransaction();
         try {
             $report->update([
-                'omset' => $request->omset
+                'omset' => $request->omset,
+                'kendala' => $request->kendala,
+                'agendas' => $request->agendas ? array_map('trim', explode(',', $request->agendas)) : null
             ]);
 
             // Update activities
@@ -123,11 +203,37 @@ class DailySalesReportController extends Controller
             $report->offers()->delete();
             if ($request->has('offers')) {
                 foreach ($request->offers as $offer) {
+                    $updates = isset($offer['updates']) ? explode(',', $offer['updates']) : null;
+                    
                     DailyOffer::create([
                         'daily_report_id' => $report->id,
                         'offer_id' => $offer['id'],
-                        'is_prospect' => $offer['is_prospect'] ?? false,
-                        'updates' => $offer['updates'] ?? null
+                        'is_prospect' => isset($offer['is_prospect']) ? true : false,
+                        'is_closing' => isset($offer['is_closing']) ? true : false,
+                        'updates' => $updates
+                    ]);
+
+                    Offer::where('id', $offer['id'])->update([
+                        'updates' => $updates,
+                        'is_closing' => isset($offer['is_closing']) ? true : false,
+                        'is_prospect' => isset($offer['is_prospect']) ? true : false
+                    ]);
+                }
+            }
+
+            // Update ads reports
+            $report->adsReports()->delete();
+            if ($request->has('ads')) {
+                foreach ($request->ads as $index => $adsData) {
+                    AdsReport::create([
+                        'daily_report_id' => $report->id,
+                        'ads_id' => $adsData['ads_id'],
+                        'platform_id' => $adsData['platform_id'],
+                        'job_name' => $adsData['job_name'],
+                        'lead_amount' => $adsData['lead_amount'] ?? 0,
+                        'total_omset' => $adsData['total_omset'] ?? 0,
+                        'analisa' => $adsData['analisa'] ?? null,
+                        'kendala' => $adsData['kendala'] ?? null
                     ]);
                 }
             }
@@ -147,6 +253,7 @@ class DailySalesReportController extends Controller
         try {
             $report->activities()->delete();
             $report->offers()->delete();
+            $report->adsReports()->delete();
             $report->delete();
             
             DB::commit();

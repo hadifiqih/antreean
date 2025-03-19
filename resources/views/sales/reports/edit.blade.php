@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('partials.messages')
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">

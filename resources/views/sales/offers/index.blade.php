@@ -23,21 +23,21 @@
                         <table class="table table-bordered table-hover">
                             <thead>
                                 <tr>
-                                    <th>Job</th>
+                                    <th>Pekerjaan</th>
                                     <th>Platform</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
+                                    <th>Harga</th>
+                                    <th>Jumlah</th>
                                     <th>Total</th>
-                                    <th>Description</th>
-                                    <th>Updates</th>
-                                    <th width="150">Actions</th>
+                                    <th>Deskripsi</th>
+                                    <th>Update</th>
+                                    <th width="150">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($offers as $offer)
                                     <tr>
-                                        <td>{{ $offer->job->name }}</td>
-                                        <td>{{ $offer->platform->name ?? '-' }}</td>
+                                        <td>{{ $offer->job->job_name }}</td>
+                                        <td>{{ $offer->platform->platform_name ?? '-' }}</td>
                                         <td>{{ number_format($offer->price, 0) }}</td>
                                         <td>{{ $offer->qty ?? '-' }}</td>
                                         <td>{{ $offer->total ? number_format($offer->total, 0) : '-' }}</td>

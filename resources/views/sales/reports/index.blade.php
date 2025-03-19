@@ -21,11 +21,11 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
+                                    <th>Tanggal</th>
                                     <th>Omset</th>
-                                    <th>Activities</th>
-                                    <th>Offers</th>
-                                    <th>Actions</th>
+                                    <th>Aktivitas</th>
+                                    <th>Penawaran</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -33,19 +33,19 @@
                                 <tr>
                                     <td>{{ $report->created_at->format('d M Y') }}</td>
                                     <td>Rp {{ number_format($report->omset, 0, ',', '.') }}</td>
-                                    <td>{{ $report->activities->count() }} activities</td>
-                                    <td>{{ $report->offers->count() }} offers</td>
+                                    <td>{{ $report->activities->count() }} aktivitas</td>
+                                    <td>{{ $report->offers->count() }} penawaran</td>
                                     <td>
-                                        <a href="{{ route('sales.reports.show', $report) }}" class="btn btn-sm btn-info">
+                                        <a href="{{ route('sales.reports.show', $report) }}" class="btn btn-sm btn-info" title="Lihat">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('sales.reports.edit', $report) }}" class="btn btn-sm btn-warning">
+                                        <a href="{{ route('sales.reports.edit', $report) }}" class="btn btn-sm btn-warning" title="Ubah">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('sales.reports.destroy', $report) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin?')" title="Hapus">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -53,7 +53,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="text-center">No reports found</td>
+                                    <td colspan="5" class="text-center">Tidak ada laporan</td>
                                 </tr>
                                 @endforelse
                             </tbody>

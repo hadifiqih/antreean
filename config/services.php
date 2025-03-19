@@ -37,5 +37,5 @@ return [
         'instanceId' => '0958376f-0b36-4f59-adae-c1e55ff3b848'
     ],
 
-
+    'api_url_antrian' => env('API_URL_ANTRIAN', 'https://api.example.com'),
 ];

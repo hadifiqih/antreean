@@ -28,7 +28,7 @@ class OfferController extends Controller
     public function create()
     {
         $jobs = Job::all();
-        $platforms = Platform::all();
+        $platforms = Platform::orderBy('platform_name')->get();
         return view('sales.offers.create', compact('jobs', 'platforms'));
     }
 
@@ -56,7 +56,7 @@ class OfferController extends Controller
         $offer->save();
 
         return redirect()->route('sales.offers.index')
-            ->with('success', 'Offer created successfully');
+            ->with('success', 'Penawaran berhasil dibuat');
     }
 
     public function edit(Offer $offer)
@@ -91,7 +91,7 @@ class OfferController extends Controller
         $offer->save();
 
         return redirect()->route('sales.offers.index')
-            ->with('success', 'Offer updated successfully');
+            ->with('success', 'Penawaran berhasil diperbarui');
     }
 
     public function destroy(Offer $offer)
