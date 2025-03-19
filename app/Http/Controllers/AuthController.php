@@ -91,11 +91,17 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'telepon' => 'required|string|min:10|max:13',
             'password' => 'required|string|min:8|max:35',
-            'tahunMasuk' => 'required|string',
-            'divisi' => 'required|string',
-            'lokasi' => 'required|string',
-            'terms' => 'required'
+            'tahunMasuk' => 'required|string|max:4',
+            'divisi' => 'required|string|in:manajemen,produksi,sales,desain,keuangan,logistik',
+            'role' => 'required|string',
+            'lokasi' => 'required|string|in:Malang,Surabaya,Kediri,Sidoarjo',
+            'terms' => 'required|accepted'
         ];
+
+        // Add conditional validation for sales
+        if ($request->divisi === 'sales') {
+            $rules['salesApa'] = 'required|exists:sales,id';
+        }
 
         $validator = Validator::make($request->all(), $rules);
 
@@ -105,21 +111,7 @@ class AuthController extends Controller
                 ->withInput($request->except('password'));
         }
 
-        // Map roles to a single check
-        $roles = [
-            'roleProduksi', 'roleSales', 'roleDesain', 
-            'roleKeuangan', 'roleLogistik', 'roleManajemen'
-        ];
-        
-        $role = null;
-        foreach ($roles as $roleKey) {
-            if ($request->$roleKey) {
-                $role = $request->$roleKey;
-                break;
-            }
-        }
-
-        // Map locations to codes using constant array
+        // Map locations to codes
         $locationCodes = [
             'Surabaya' => '1',
             'Malang' => '2',
@@ -127,23 +119,24 @@ class AuthController extends Controller
             'Sidoarjo' => '4'
         ];
 
-        $tempatKerja = $locationCodes[$request->lokasi] ?? null;
+        $tempatKerja = $locationCodes[$request->lokasi];
         $tahunMasuk = substr($request->tahunMasuk, -2);
 
         try {
-            // Begin transaction
             DB::beginTransaction();
 
+            // Create user
             $user = User::create([
                 'name' => ucwords(strtolower($request->nama)),
                 'email' => $request->email,
                 'phone' => $request->telepon,
                 'password' => bcrypt($request->password),
-                'role' => $role,
+                'role' => $request->role,
                 'divisi' => $request->divisi
             ]);
 
-            $nip = $tempatKerja . $tahunMasuk . $user->id;
+            // Generate NIP and create employee record
+            $nip = $tempatKerja . $tahunMasuk . str_pad($user->id, 4, '0', STR_PAD_LEFT);
 
             Employee::create([
                 'nip' => $nip,
@@ -155,12 +148,15 @@ class AuthController extends Controller
                 'user_id' => $user->id
             ]);
 
-            if ($request->roleSales && $request->salesApa) {
+            // Handle sales assignment if applicable
+            if ($request->divisi === 'sales' && $request->salesApa) {
                 Sales::where('id', $request->salesApa)
                     ->update(['user_id' => $user->id]);
             }
 
+            // Create auth token
             $user->createToken('authToken')->plainTextToken;
+            
             DB::commit();
 
             return redirect()->route('auth.login')
@@ -168,8 +164,9 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
             return redirect()->route('auth.register')
-                ->with('error', 'Terjadi kesalahan saat registrasi')
+                ->with('error', 'Terjadi kesalahan saat registrasi: ' . $e->getMessage())
                 ->withInput($request->except('password'));
         }
     }

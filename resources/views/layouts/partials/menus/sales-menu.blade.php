@@ -15,7 +15,7 @@
 </li>
 
 <li class="nav-item">
-    <a href="{{ route('design.index') }}" class="nav-link {{ Request::is('order*') ? 'active' : '' }}">
+    <a href="{{ route('design.index') }}" class="nav-link {{ Request::is('design*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-pen"></i>
         <p>Desain</p>
     </a>

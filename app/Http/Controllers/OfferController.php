@@ -17,10 +17,17 @@ class OfferController extends Controller
 
     public function index()
     {
-        $offers = Offer::with(['job', 'sales', 'platform'])
+        if (Auth::user()->role !== 'sales') {
+            $offers = Offer::with(['job', 'sales', 'platform'])
+            ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        }else {
+            $offers = Offer::with(['job', 'sales', 'platform'])
             ->where('sales_id', Auth::user()->sales->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+        }
         
         return view('sales.offers.index', compact('offers'));
     }

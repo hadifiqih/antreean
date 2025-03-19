@@ -15,6 +15,27 @@ class Employee extends Model
 
     protected $table = 'employees';
 
+    protected $fillable = [
+        'nip',
+        'name',
+        'where_born',
+        'date_of_birth',
+        'jenis_kelamin',
+        'email',
+        'phone',
+        'address',
+        'role',
+        'division',
+        'office',
+        'photo',
+        'joining_date',
+        'bank_name',
+        'bank_account',
+        'status',
+        'user_id',
+        'remember_token',
+    ];
+
     //relasi dengan tabel antrian
     public function operatedAntrians()
     {

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Offer;
 use App\Models\Sales;
+use GuzzleHttp\Client;
 use App\Models\Antrian;
+use App\Models\AdsReport;
 use App\Models\DailyOffer;
 use App\Models\DailyReport;
 use App\Models\ActivityType;
@@ -13,8 +16,6 @@ use App\Models\DailyActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\DailyReportRequest;
-use GuzzleHttp\Client;
-use App\Models\AdsReport;
 
 class DailySalesReportController extends Controller
 {
@@ -25,11 +26,18 @@ class DailySalesReportController extends Controller
 
     public function index()
     {
-        $sales = Sales::where('user_id', Auth::id())->first();
-        $reports = DailyReport::with(['activities.activityType', 'offers.offer'])
-            ->where('sales_id', $sales->id)
+        if(Auth::user()->role !== 'sales') {
+            $reports = DailyReport::with(['activities.activityType', 'offers.offer'])
+            ->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+        }else{
+            $sales = Sales::where('user_id', Auth::id())->first();
+            $reports = DailyReport::with(['activities.activityType', 'offers.offer'])
+                ->where('sales_id', $sales->id)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+        }
         
         return view('sales.reports.index', compact('reports'));
     }
@@ -138,7 +146,7 @@ class DailySalesReportController extends Controller
     public function show(DailyReport $report)
     {
         $report->load(['activities.activityType', 'offers.offer']);
-        $antrians = Antrian::with(['job'])->where('sales_id', Auth::user()->sales->id)
+        $antrians = Antrian::with(['job'])->where('sales_id', $report->sales_id)
             ->whereDate('created_at', $report->created_at->format('Y-m-d'))
             ->get();
             
@@ -148,7 +156,7 @@ class DailySalesReportController extends Controller
     public function edit(DailyReport $report)
     {
         $activityTypes = ActivityType::all();
-        $offers = Offer::where('sales_id', Auth::user()->sales->id)
+        $offers = Offer::where('sales_id', $report->sales_id)
             ->whereDoesntHave('dailyOffers', function($query) use ($report) {
                 $query->where('daily_report_id', '!=', $report->id);
             })
@@ -158,7 +166,7 @@ class DailySalesReportController extends Controller
 
         try {
             $client = new Client();
-            $response = $client->request('GET', config('services.api_url_antrian') . '/api/ads/sales/' . Auth::user()->sales->id, [
+            $response = $client->request('GET', config('services.api_url_antrian') . '/api/ads/sales/' . $report->sales_id, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . env('API_TOKEN')
                 ]

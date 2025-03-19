@@ -69,6 +69,7 @@
                 </a>
               </div>
               <!-- /Logo -->
+              @include('partials.messages')
               <h4 class="mb-2">Daftar Akun Antree 🚀</h4>
               <p class="mb-4">Silahkan isi form dibawah guys !</p>
 
@@ -137,78 +138,43 @@
 
                 <div class="mb-3">
                     <label for="divisi" class="form-label">Divisi/Jabatan</label>
-                    <select id="divisi" class="form-select" name="divisi" required>
+                    <select id="divisi" class="form-select @error('divisi') is-invalid @enderror" name="divisi" required>
                         <option value="" selected disabled>-- Pilih Divisi --</option>
-                        <option value="manajemen">Manajemen</option>
-                        <option value="produksi">Produksi</option>
-                        <option value="sales">Pemasaran & Penjualan</option>
-                        <option value="desain">Desain Grafis</option>
-                        <option value="keuangan">Keuangan & Administrasi</option>
-                        <option value="logistik">Logistik & Pengiriman</option>
+                        <option value="manajemen" {{ old('divisi') == 'manajemen' ? 'selected' : '' }}>Manajemen</option>
+                        <option value="produksi" {{ old('divisi') == 'produksi' ? 'selected' : '' }}>Produksi</option>
+                        <option value="sales" {{ old('divisi') == 'sales' ? 'selected' : '' }}>Pemasaran & Penjualan</option>
+                        <option value="desain" {{ old('divisi') == 'desain' ? 'selected' : '' }}>Desain Grafis</option>
+                        <option value="keuangan" {{ old('divisi') == 'keuangan' ? 'selected' : '' }}>Keuangan & Administrasi</option>
+                        <option value="logistik" {{ old('divisi') == 'logistik' ? 'selected' : '' }}>Logistik & Pengiriman</option>
                     </select>
+                    @error('divisi')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3" id="roleContainer" style="display: none;">
+                    <label for="role" class="form-label">Jabatan</label>
+                    <select id="role" class="form-select @error('role') is-invalid @enderror" name="role" required>
+                        <option value="" selected disabled>-- Pilih Jabatan --</option>
+                    </select>
+                    @error('role')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="mb-3" id="inputSales" style="display: none;">
-                  <label for="inputSalesField" class="form-label">Brand</label>
-                  <select id="inputSalesField" class="form-select" name="salesApa">
-                    <option value="" selected disabled>-- Pilih --</option>
-                    @foreach ($sales as $item)
-                      <option value="{{ $item->id }}">{{ $item->sales_name }}</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                <div class="mb-3" id="inputRoleManajemen" style="display: none">
-                    <label for="roleManajemen">Jabatan</label>
-                    <select class="form-select" name="roleManajemen" id="roleManajemen">
-                        <option value="" selected disabled>-- Pilih --</option>
-                        <option value="ceo">CEO</option>
-                        <option value="direktur">Direktur</option>
-                        <option value="manager">Manager</option>
-                        <option value="hrd">HRD</option>
+                    <label for="inputSalesField" class="form-label">Brand</label>
+                    <select id="inputSalesField" class="form-select @error('salesApa') is-invalid @enderror" name="salesApa">
+                        <option value="" selected disabled>-- Pilih Brand --</option>
+                        @foreach ($sales as $item)
+                            <option value="{{ $item->id }}" {{ old('salesApa') == $item->id ? 'selected' : '' }}>
+                                {{ $item->sales_name }}
+                            </option>
+                        @endforeach
                     </select>
-                </div>
-
-                <div class="mb-3" id="inputRoleProduksi" style="display: none">
-                    <label for="roleProduksi" class="form-label">Jabatan</label>
-                    <select id="roleProduksi" class="form-select" name="roleProduksi">
-                        <option value="" selected disabled>-- Pilih --</option>
-                        <option value="estimator">Estimator / Supervisor / Kepala Cabang</option>
-                        <option value="stempel">Staff Stempel</option>
-                        <option value="advertising">Staff Advertising</option>
-                        <option value="admin">Admin Workshop</option>
-                        <option value="dokumentasi">Staff Dokumentasi</option>
-                    </select>
-                </div>
-                <div class="mb-3" id="inputRoleSales" style="display: none">
-                    <label for="roleSales" class="form-label">Jabatan</label>
-                    <select id="roleSales" class="form-select" name="roleSales">
-                        <option value="" selected disabled>-- Pilih --</option>
-                        <option value="sales">Supervisor</option>
-                        <option value="sales">Sales</option>
-                    </select>
-                </div>
-                <div class="mb-3" id="inputRoleDesain" style="display: none">
-                    <label for="roleDesain" class="form-label">Jabatan</label>
-                    <select id="roleDesain" class="form-select" name="roleDesain">
-                        <option value="" selected disabled>-- Pilih --</option>
-                        <option value="desain">Supervisor</option>
-                        <option value="desain">Staff Desain</option>
-                    </select>
-                </div>
-                <div class="mb-3" id="inputRoleKeuangan" style="display: none">
-                    <label for="roleKeuangan" class="form-label">Jabatan</label>
-                    <select id="roleKeuangan" class="form-select" name="roleKeuangan">
-                        <option value="" selected disabled>-- Pilih --</option>
-                        <option value="staffAdmin">Staff Admin</option>
-                    </select>
-                </div>
-                <div class="mb-3" id="inputRoleLogistik" style="display: none">
-                    <label for="roleLogistik" class="form-label">Jabatan</label>
-                    <select id="roleLogistik" class="form-select" name="roleLogistik">
-                        <option value="" selected disabled>-- Pilih --</option>
-                        <option value="staffGudang">Staff Gudang / Logistik</option>
-                    </select>
+                    @error('salesApa')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="mb-3">
@@ -265,90 +231,95 @@
 
     <!-- Page JS -->
     <script>
-      $(document).ready(function() {
-          // Ketika pilihan dalam dropdown berubah
-          $("#divisi").change(function() {
-              var selectedDivisi = $(this).val();
+        $(document).ready(function() {
+            const roles = {
+                manajemen: [
+                    {value: 'ceo', label: 'CEO'},
+                    {value: 'direktur', label: 'Direktur'},
+                    {value: 'manager', label: 'Manager'},
+                    {value: 'hrd', label: 'HRD'}
+                ],
+                produksi: [
+                    {value: 'estimator', label: 'Estimator / Supervisor / Kepala Cabang'},
+                    {value: 'stempel', label: 'Staff Stempel'},
+                    {value: 'advertising', label: 'Staff Advertising'},
+                    {value: 'admin', label: 'Admin Workshop'},
+                    {value: 'dokumentasi', label: 'Staff Dokumentasi'}
+                ],
+                sales: [
+                    {value: 'supervisor', label: 'Supervisor'},
+                    {value: 'sales', label: 'Sales'}
+                ],
+                desain: [
+                    {value: 'supervisor', label: 'Supervisor'},
+                    {value: 'staff', label: 'Staff Desain'}
+                ],
+                keuangan: [
+                    {value: 'staffAdmin', label: 'Staff Admin'}
+                ],
+                logistik: [
+                    {value: 'staffGudang', label: 'Staff Gudang / Logistik'}
+                ]
+            };
 
-                //reset semua select ke default
-                $('#roleProduksi').prop('selectedIndex',0);
-                $('#roleSales').prop('selectedIndex',0);
-                $('#roleDesain').prop('selectedIndex',0);
-                $('#roleKeuangan').prop('selectedIndex',0);
-                $('#roleLogistik').prop('selectedIndex',0);
-                $('#roleManajemen').prop('selectedIndex',0);
+            function updateRoleOptions(selectedDivisi) {
+                const $roleSelect = $('#role');
+                const $roleContainer = $('#roleContainer');
+                const $inputSales = $('#inputSales');
+                
+                $roleSelect.find('option:not(:first)').remove();
+                
+                if (!selectedDivisi) {
+                    $roleContainer.hide();
+                    $inputSales.hide();
+                    return;
+                }
 
-              // Cek apakah pilihan yang dipilih adalah "Sales"
-              if (selectedDivisi == "sales") {
+                const divisiRoles = roles[selectedDivisi] || [];
+                divisiRoles.forEach(role => {
+                    $roleSelect.append(new Option(role.label, role.value));
+                });
 
-                    $("#inputSales").show();
-                    $("#inputRoleSales").show();
-                    $("#inputRoleDesain").hide();
-                    $("#inputRoleKeuangan").hide();
-                    $("#inputRoleLogistik").hide();
-                    $("#inputRoleProduksi").hide();
-                    $("#inputRoleManajemen").hide();
+                if (selectedDivisi === 'sales') {
+                    $inputSales.show();
+                } else {
+                    $inputSales.hide();
+                }
 
-              } else if (selectedDivisi == "desain") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
-                    $("#inputRoleDesain").show();
-                    $("#inputRoleKeuangan").hide();
-                    $("#inputRoleLogistik").hide();
-                    $("#inputRoleProduksi").hide();
-                    $("#inputRoleManajemen").hide();
-              } else if (selectedDivisi == "keuangan") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
-                    $("#inputRoleDesain").hide();
-                    $("#inputRoleKeuangan").show();
-                    $("#inputRoleLogistik").hide();
-                    $("#inputRoleProduksi").hide();
-                    $("#inputRoleManajemen").hide();
+                $roleContainer.show();
+            }
 
-              } else if (selectedDivisi == "logistik") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
-                    $("#inputRoleDesain").hide();
-                    $("#inputRoleKeuangan").hide();
-                    $("#inputRoleLogistik").show();
-                    $("#inputRoleProduksi").hide();
-                    $("#inputRoleManajemen").hide();
+            // Initial setup based on old input if exists
+            const initialDivisi = $('#divisi').val();
+            if (initialDivisi) {
+                updateRoleOptions(initialDivisi);
+                // Set old role value if exists
+                const oldRole = "{{ old('role') }}";
+                if (oldRole) {
+                    $('#role').val(oldRole);
+                }
+            }
 
-              } else if (selectedDivisi == "produksi") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
-                    $("#inputRoleDesain").hide();
-                    $("#inputRoleKeuangan").hide();
-                    $("#inputRoleLogistik").hide();
-                    $("#inputRoleProduksi").show();
-                    $("#inputRoleManajemen").hide();
-
-              } else if (selectedDivisi == "manajemen") {
-                    $("#inputSales").hide();
-                    $("#inputRoleSales").hide();
-                    $("#inputRoleDesain").hide();
-                    $("#inputRoleKeuangan").hide();
-                    $("#inputRoleLogistik").hide();
-                    $("#inputRoleProduksi").hide();
-                    $("#inputRoleManajemen").show();
-
-              }
+            // Update on division change
+            $('#divisi').change(function() {
+                updateRoleOptions($(this).val());
             });
 
-          $("#password").keyup(function() {
-            var password = $(this).val();
-            var passwordError = $("#passwordError");
+            // Password validation
+            $("#password").keyup(function() {
+                var password = $(this).val();
+                var passwordError = $("#passwordError");
 
-            if (password.length < 8) {
-              passwordError.html("Password minimal 8 karakter");
-            } else if (password.includes(" ")) {
-              passwordError.html("Password tidak boleh mengandung spasi");
-            } else {
-              passwordError.html("");
-            }
-          });
-          //Jika tombol checkbox dicentang maka tombol submit akan aktif
+                if (password.length < 8) {
+                  passwordError.html("Password minimal 8 karakter");
+                } else if (password.includes(" ")) {
+                  passwordError.html("Password tidak boleh mengandung spasi");
+                } else {
+                  passwordError.html("");
+                }
+            });
+
+            // Terms checkbox handling
             $("#terms-conditions").click(function() {
                 if ($(this).is(":checked")) {
                 $("#btnDaftar").removeAttr("disabled");
@@ -356,8 +327,8 @@
                 $("#btnDaftar").attr("disabled", true);
                 }
             });
-      });
-  </script>
+        });
+    </script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>

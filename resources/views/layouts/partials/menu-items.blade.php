@@ -16,6 +16,8 @@
     @include('layouts.partials.menus.desain-menu')
 @elseif(Auth::user()->role == 'stempel' || Auth::user()->role == 'advertising')
     @include('layouts.partials.menus.operator-menu')
+@elseif(Auth::user()->role == 'ceo' || Auth::user()->role == 'dirut')
+    @include('layouts.partials.menus.management-menu')
 @endif
 
 <!-- Logout -->

@@ -40,6 +40,16 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'phone',
+        'role',
+        'divisi',
+        'remember_token',
+    ];
+
     public function isAdmin()
     {
         return $this->role === 'admin';

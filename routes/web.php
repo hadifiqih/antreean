@@ -329,7 +329,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Offers
-    Route::middleware(['sales'])->group(function () {
+    Route::middleware(['auth'])->group(function () {
         Route::prefix('sales/offers')->name('sales.offers.')->group(function () {
             Route::get('/', [OfferController::class, 'index'])->name('index');
             Route::get('/create', [OfferController::class, 'create'])->name('create');
