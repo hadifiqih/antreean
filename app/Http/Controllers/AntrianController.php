@@ -34,10 +34,26 @@ class AntrianController extends Controller
         $this->middleware('auth');
     }
 
+    public function cariOrder(Request $request)
+    {
+        return view('page.antrian-workshop.search-by-ticket');
+    }
+
+    public function resultCariOrder(Request $request)
+    {
+        $ticketOrder = $request->input('ticket');
+        $antrian = Antrian::with(['payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])->where('ticket_order', $ticketOrder)->first();
+
+        if ($antrian) {
+            return view('page.antrian-workshop.estimator-produksi', compact('antrian'));
+        } else {
+            return redirect()->back()->with('error', 'Data tidak ditemukan !');
+        }
+    }
+
     public function estimatorProduksi(string $id)
     {
         $antrian = Antrian::with(['payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])->where('ticket_order', $id)->first();
-
         return view('page.antrian-workshop.estimator-produksi', compact('antrian'));
     }
 

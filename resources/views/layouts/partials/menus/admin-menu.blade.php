@@ -1,5 +1,5 @@
 <!-- Master Data -->
-<li class="nav-item {{ Request::is('master*') ? 'menu-open' : '' }}">
+{{-- <li class="nav-item {{ Request::is('master*') ? 'menu-open' : '' }}">
     <a href="#" class="nav-link {{ Request::is('master*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-database"></i>
         <p>
@@ -27,13 +27,13 @@
             </a>
         </li>
     </ul>
-</li>
+</li> --}}
 
 <!-- Orders -->
 <li class="nav-item">
-    <a href="{{ route('order.index') }}" class="nav-link {{ Request::is('order*') ? 'active' : '' }}">
+    <a href="{{ route('antrian.index') }}" class="nav-link {{ Request::is('order*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-shopping-cart"></i>
-        <p>Orders</p>
+        <p>Antrian</p>
     </a>
 </li>
 
@@ -42,21 +42,15 @@
     <a href="#" class="nav-link {{ Request::is('report*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-chart-bar"></i>
         <p>
-            Reports
+            Laporan
             <i class="right fas fa-angle-left"></i>
         </p>
     </a>
     <ul class="nav nav-treeview">
         <li class="nav-item">
-            <a href="{{ route('report.sales') }}" class="nav-link {{ Request::is('report/sales*') ? 'active' : '' }}">
+            <a href="{{ route('laporan.workshop') }}" class="nav-link {{ Request::is('report/sales*') ? 'active' : '' }}">
                 <i class="far fa-circle nav-icon"></i>
-                <p>Sales Report</p>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="{{ route('report.performance') }}" class="nav-link {{ Request::is('report/performance*') ? 'active' : '' }}">
-                <i class="far fa-circle nav-icon"></i>
-                <p>Performance Report</p>
+                <p>Laporan Workshop</p>
             </a>
         </li>
     </ul>

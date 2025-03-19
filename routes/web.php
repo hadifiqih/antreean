@@ -246,6 +246,10 @@ Route::controller(AntrianController::class)->group(function(){
     Route::get('/antrian/tandai-selesai/{id}', 'markSelesai')->middleware('auth')->name('antrian.markSelesai');
     Route::post('/antrian/filterByCategory', 'filterProcess')->middleware('auth')->name('antrian.filterByCategory');
     Route::get('/antrian/estimator-produksi/{id}', 'estimatorProduksi')->middleware('auth')->name('antrian.estimator-produksi');
+
+    Route::get('/antrian/search', 'cariOrder')->middleware('auth')->name('antrian.cariOrder');
+    Route::get('/antrian/result-search', 'resultCariOrder')->middleware('auth')->name('antrian.resultCariOrder');
+
 });
 
 Route::controller(PaymentController::class)->group(function(){

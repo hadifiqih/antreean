@@ -1,4 +1,4 @@
-<!-- Orders Overview -->
+{{-- <!-- Orders Overview -->
 <li class="nav-item">
     <a href="{{ route('order.index') }}" class="nav-link {{ Request::is('order*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-tasks"></i>
@@ -54,4 +54,11 @@
             </a>
         </li>
     </ul>
+</li> --}}
+<!-- Orders -->
+<li class="nav-item">
+    <a href="{{ route('antrian.index') }}" class="nav-link {{ Request::is('order*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-shopping-cart"></i>
+        <p>Antrian</p>
+    </a>
 </li>

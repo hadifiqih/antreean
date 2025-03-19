@@ -12,9 +12,9 @@
     @include('layouts.partials.menus.sales-menu')
 @elseif(Auth::user()->role == 'supervisor')
     @include('layouts.partials.menus.supervisor-menu')
-@elseif(Auth::user()->role == 'desain')
+@elseif(Auth::user()->role == 'desain' || Auth::user()->employee->can_design == 1)
     @include('layouts.partials.menus.desain-menu')
-@elseif(Auth::user()->role == 'operator')
+@elseif(Auth::user()->role == 'stempel' || Auth::user()->role == 'advertising')
     @include('layouts.partials.menus.operator-menu')
 @endif
 

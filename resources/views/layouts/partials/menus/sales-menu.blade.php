@@ -1,8 +1,23 @@
 <!-- Orders -->
 <li class="nav-item">
-    <a href="{{ route('antrian.index') }}" class="nav-link {{ Request::is('order*') ? 'active' : '' }}">
+    <a href="{{ route('antrian.index') }}" class="nav-link {{ Request::is('antrian*') && !Request::is('antrian/search') ? 'active' : '' }}">
         <i class="nav-icon fas fa-shopping-cart"></i>
         <p>Antrian</p>
+    </a>
+</li>
+
+{{-- Cari Order Berdasarkan Tiket --}}
+<li class="nav-item">
+    <a href="{{ route('antrian.cariOrder') }}" class="nav-link {{ Request::is('antrian/search') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-search"></i>
+        <p>Cari Order</p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{{ route('design.index') }}" class="nav-link {{ Request::is('order*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-pen"></i>
+        <p>Desain</p>
     </a>
 </li>
 

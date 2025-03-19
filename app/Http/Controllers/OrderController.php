@@ -66,7 +66,7 @@ class OrderController extends Controller
         }elseif(auth()->user()->role == 'desain' || auth()->user()->role == 'stempel'){
             $listDesain = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 0)->get();
             $listDikerjakan = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 1)->where('employee_id', Auth::user()->employee->id)->get();
-            $listSelesai = Order::with('employee', 'sales', 'job', 'user')->where('status', 2)->where('employee_id', Auth::user()->employee->id)->take(250)->get();
+            $listSelesai = Order::with('employee', 'sales', 'job', 'user')->where('status', 2)->where('employee_id', Auth::user()->employee->id)->take(50)->get();
             $listRevisi = Order::with('employee', 'sales', 'job', 'user')->where('status', 2)->where('ada_revisi', 1)->where('employee_id', Auth::user()->employee->id)->get();
         }else{
             $listDesain = Order::with('employee', 'sales', 'job', 'user')->orderByDesc('is_priority')->where('status', 0)->get();
