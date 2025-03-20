@@ -21,6 +21,11 @@ class Antrian extends Model
 
     protected $table = 'antrians';
 
+    public function scopeFindInSet($query, $column, $value)
+    {
+        return $query->whereRaw("FIND_IN_SET(?, $column)", [$value]);
+    }
+
     public function sales()
     {
         return $this->belongsTo(Sales::class);

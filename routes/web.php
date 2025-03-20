@@ -28,6 +28,7 @@ use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Notification;
 use App\Http\Controllers\DataAnalisController;
 use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\Operator\TaskController;
 use App\Http\Controllers\DailySalesReportController;
 
 /*
@@ -47,7 +48,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return view('page.dashboard');
-})->name('dashboard');
+})->name('dashboard')->middleware('auth');
 
 // Reset Password ------------------------------
 
@@ -295,6 +296,9 @@ Route::controller(UserController::class)->group(function(){
     Route::put('/user/update/{id}', 'update')->middleware(['auth', 'checkrole:superadmin'])->name('user.update');
     Route::delete('/user/{id}', 'destroy')->middleware(['auth', 'checkrole:superadmin'])->name('user.destroy');
 });
+
+Route::resource('task', TaskController::class)->middleware('auth');
+Route::put('task/{ticket}/complete', [TaskController::class, 'complete'])->name('task.complete')->middleware('auth');
 
 Route::controller(DataAnalisController::class)->group(function(){
     Route::get('/data-analis/produk-terlaris', 'produkTerlaris')->name('produkTerlaris');

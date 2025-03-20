@@ -1,10 +1,5 @@
 @extends('layouts.app')
 
-@section('title', 'Antrian | CV. Kassab Syariah')
-@section('username', Auth::user()->name)
-@section('page', 'Antrian')
-@section('breadcrumb', 'Detail Antrian')
-
 @section('content')
 <div class="container">
     <div class="card shadow-sm">
@@ -106,6 +101,28 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Nama File</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>File Cetak</th>
+                                <th>{{ $antrian->order->file_cetak }}</th>
+                                <th><a href="{{ route('design.download', $antrian->id) }}" class="btn btn-primary">Unduh</a></th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
 
             <div class="row mb-4">
                 <div class="col-md-6">

@@ -148,7 +148,7 @@
                                                         $isRevisi = $antrian->order->ada_revisi ?? null;
                                                         $linkFile = $antrian->order->link_file ?? null;
                                                     @endphp
-                                                
+
                                                     @if(!$linkFile) <!-- Jika link file null -->
                                                         @if($isRevisi == 0)
                                                             <a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a>
@@ -353,7 +353,7 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-        
+
                                 @if(auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
                                     <p class="text-muted font-italic mt-2 text-sm">*Tombol <span class="text-danger">"Upload Progress"</span> akan aktif diatas jam 15.00</p>
                                 @endif
@@ -654,11 +654,21 @@
 
 @endsection
 
-@section('script')
-<script>
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-countdown@2.2.0/dist/jquery.countdown.min.css">
+<link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="{{ asset('adminlte/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
+@endpush
 
-</script>
-
+@push('scripts')
+<script src="{{ asset('adminlte/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('adminlte/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('adminlte/plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script src="{{ asset('adminlte/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('adminlte/plugins/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
+<script src="{{ asset('adminlte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-countdown@2.2.0/dist/jquery.countdown.min.js"></script>
 <script src="{{ asset('adminlte/dist/js/maskMoney.min.js') }}"></script>
     <script>
         $(document).ready(function() {
@@ -685,31 +695,43 @@
                 });
             });
 
-            $('.countdown').each(function() {
-                var element = $(this);
-                var countDownDate = new Date(element.data('countdown')).getTime();
+            function initializeCountdowns() {
+                $('.countdown').each(function() {
+                    var $this = $(this);
+                    // Stop any existing countdown
+                    if ($this.data('countdown-instance')) {
+                        $this.countdown('stop');
+                    }
 
-                if (isNaN(countDownDate)) {
-                    element.html("<span class='text-danger'>BELUM DIANTRIKAN</span>");
-                } else {
-                    var x = setInterval(function() {
-                        var now = new Date().getTime();
-                        var distance = countDownDate - now;
+                    var finalDate = $(this).data('countdown');
+                    try {
+                        $this.countdown(finalDate)
+                            .on('update.countdown', function(event) {
+                                if (event.offset.totalDays > 0) {
+                                    $this.html(event.strftime('%D hari %H:%M:%S'));
+                                } else {
+                                    $this.html(event.strftime('%H:%M:%S'));
+                                }
+                            })
+                            .on('finish.countdown', function() {
+                                $this.html('<span class="text-danger">TERLAMBAT</span>');
+                            });
+                        $this.data('countdown-instance', true);
+                    } catch (error) {
+                        console.error('Error initializing countdown:', error);
+                        $this.html('<span class="text-danger">BELUM DIANTRIKAN</span>');
+                    }
+                });
+            }
 
-                        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            // Initial countdown initialization
+            initializeCountdowns();
 
-                        element.html("<span class='text-success'>" + days + "d " + hours + "h " + minutes + "m " + seconds + "s " + "</span>");
-
-                        if (distance < 0) {
-                            clearInterval(x);
-                            element.html("<span class='text-danger'>TERLAMBAT</span>");
-                        }
-                    }, 1000);
-                }
+            // Reinitialize countdowns after DataTable operations
+            table.on('draw', function() {
+                initializeCountdowns();
             });
+
 
             $('.metodePembayaran').on('change', function(){
                 var id = $(this).attr('id').split('metodePembayaran')[1];
@@ -754,4 +776,4 @@
             });
         });
     </script>
-@endsection
+@endpush
