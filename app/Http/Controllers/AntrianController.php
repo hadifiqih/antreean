@@ -242,11 +242,37 @@ class AntrianController extends Controller
         return view('page.admin-sales.omset-global', compact('listSales', 'omsetPerHari', 'dateRange'));
     }
 
-    public function downloadPrintFile($id){
-        $antrian = Antrian::where('id', $id)->first();
-        $file = $antrian->order->file_cetak;
-        $path = storage_path('app/public/file-cetak/' . $file);
-        return response()->download($path);
+    public function downloadPrintFile($id)
+    {
+        try {
+            $antrian = Antrian::findOrFail($id);
+            
+            if (!$antrian->order || !$antrian->order->file_cetak) {
+                return redirect()->back()->with('error', 'File tidak ditemukan!');
+            }
+    
+            $file = $antrian->order->file_cetak;
+            
+            // Path to external storage
+            $externalPath = '/storage/app/public/file-cetak/' . $file;
+            
+            // Check if file exists in external storage
+            if (file_exists($externalPath)) {
+                return response()->download($externalPath);
+            }
+            
+            // Fallback to local storage
+            $localPath = storage_path('app/public/file-cetak/' . $file);
+            if (file_exists($localPath)) {
+                return response()->download($localPath);
+            }
+    
+            return redirect()->back()->with('error', 'File tidak ditemukan di server!');
+    
+        } catch (\Exception $e) {
+            \Log::error('File download error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh file!');
+        }
     }
 
     public function downloadProduksiFile($id){
@@ -528,7 +554,7 @@ class AntrianController extends Controller
         //     }
         // }
 
-        return redirect()->route('antrian.index')->with('success-update', 'Data antrian berhasil diupdate!');
+        return redirect()->route('antrian.index')->with('success', 'Data antrian berhasil diupdate!');
     }
 
     public function updateDeadline(Request $request)
@@ -686,7 +712,7 @@ class AntrianController extends Controller
         $antrian->status = 2;
         $antrian->save();
 
-        return redirect()->route('antrian.index')->with('success-dokumentasi', 'Berhasil ditandai selesai !');
+        return redirect()->route('antrian.index')->with('success', 'Berhasil ditandai selesai !');
     }
 
     public function reminderProgress(){

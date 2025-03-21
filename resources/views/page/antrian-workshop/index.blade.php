@@ -1,55 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Antrian | CV. Kassab Syariah')
-
-@section('username', Auth::user()->name)
-
-@section('page', 'Antrian')
-
-@section('breadcrumb', 'Antrian Stempel')
-
 @section('content')
 
-@if(session('success'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-  {{ session('success') }}
-</div>
-@endif
-
-{{-- Alert success-update --}}
-@if(session('success-update'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-  {{ session('success-update') }}
-</div>
-@endif
-
-{{-- Alert successToAntrian --}}
-@if(session('successToAntrian'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-  {{ session('successToAntrian') }}
-</div>
-@endif
-
-{{-- Alert success-dokumentasi --}}
-@if(session('success-dokumentasi'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-  {{ session('success-dokumentasi') }}
-</div>
-@endif
-
-@if(session('success-progress'))
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-  {{ session('success-progress') }}
-</div>
-@endif
-
-@if(session('error'))
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-  {{ session('error') }}
-</div>
-@endif
-
-{{-- Alert error --}}
+@include('partials.messages')
 
 {{-- Content Table --}}
     <div class="container-fluid">

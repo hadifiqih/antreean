@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('partials.messages')
 <div class="container">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
