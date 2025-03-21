@@ -203,14 +203,26 @@
             var $this = $(this);
             var finalDate = $(this).data('countdown');
             
-            // Clear any existing countdown
-            if ($this.data('countdown-instance')) {
-                $this.countdown('remove');
-                $this.removeData('countdown-instance');
+            // Safely destroy any existing countdown
+            try {
+                if ($this.data('countdown-instance')) {
+                    $this.countdown('destroy');
+                }
+            } catch (e) {
+                console.log('Cleanup error:', e);
             }
 
+            // Reset the instance flag
+            $this.removeData('countdown-instance');
+            
+            // Initialize new countdown
             try {
-                $this.countdown(finalDate)
+                var countDate = new Date(finalDate);
+                if (isNaN(countDate.getTime())) {
+                    throw new Error('Invalid date');
+                }
+
+                $this.countdown(countDate)
                     .on('update.countdown', function(event) {
                         if (event.offset.totalDays > 0) {
                             $this.html(event.strftime('%D hari %H:%M:%S'));
@@ -231,7 +243,7 @@
 
     // DataTable initialization
     $(function () {
-        var table = $('#myTasks').DataTable({
+        var commonConfig = {
             "paging": true,
             "lengthChange": true,
             "searching": true,
@@ -239,46 +251,39 @@
             "info": true,
             "autoWidth": false,
             "responsive": true,
-            "drawCallback": function() {
+            "drawCallback": function(settings) {
+                // Clear any existing countdowns in the table
+                var api = this.api();
+                var tbody = $(api.table().body());
+                tbody.find('.countdown').each(function() {
+                    try {
+                        $(this).countdown('destroy');
+                    } catch (e) {}
+                    $(this).removeData('countdown-instance');
+                });
+                
+                // Initialize new countdowns
                 setTimeout(function() {
                     initializeCountdowns();
-                }, 0);
+                }, 50);
             }
-        });
+        };
 
-        // Initialize rekanan tasks table
-        var rekananTable = $('#rekananTasks').DataTable({
-            "paging": true,
-            "lengthChange": true,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "autoWidth": false,
-            "responsive": true,
-            "drawCallback": function() {
-                setTimeout(function() {
-                    initializeCountdowns();
-                }, 0);
-            }
-        });
-
-        // Clear all countdowns before page unload
-        $(window).on('beforeunload', function() {
-            $('[data-countdown]').each(function() {
-                if ($(this).data('countdown-instance')) {
-                    $(this).countdown('remove');
-                }
-            });
-        });
+        var table = $('#myTasks').DataTable(commonConfig);
+        var rekananTable = $('#rekananTasks').DataTable(commonConfig);
 
         // Handle tab changes
         $('#taskTabs a').on('click', function (e) {
             e.preventDefault();
             $(this).tab('show');
-            // Reinitialize countdowns when switching tabs
+            var targetTab = $(this).attr('href');
             setTimeout(function() {
-                initializeCountdowns();
-            }, 100);
+                if (targetTab === '#rekanan') {
+                    rekananTable.draw(false);
+                } else {
+                    table.draw(false);
+                }
+            }, 50);
         });
 
         // Initial countdown initialization
