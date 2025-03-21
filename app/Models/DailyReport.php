@@ -13,7 +13,6 @@ class DailyReport extends Model
     protected $fillable = [
         'sales_id',
         'user_id',
-        'omset',
         'kendala',
         'agendas'
     ];

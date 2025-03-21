@@ -23,7 +23,7 @@
 
 <!-- Daily Report -->
 <li class="nav-item">
-    <a href="{{ route('sales.reports.index') }}" class="nav-link {{ Request::is('report/daily*') ? 'active' : '' }}">
+    <a href="{{ route('sales.reports.index') }}" class="nav-link {{ Request::is('report/daily*') || Request::is('sales/reports*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-calendar-day"></i>
         <p>Laporan Harian</p>
     </a>

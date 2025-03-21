@@ -675,20 +675,26 @@
 
             $('.maskRupiah').maskMoney({prefix:'Rp ', thousands:'.', decimal:',', precision:0});
 
-            $("#dataAntrian").DataTable({
-                "responsive": true,
+            // Initialize DataTable with variable
+            var table = $("#dataAntrian").DataTable({
+                "responsive": true, 
                 "autoWidth": false,
                 "order": [[ 0, "desc" ]],
                 "pageLength": 25,
+                "drawCallback": function() {
+                    // Reinitialize countdowns after each draw
+                    initializeCountdowns();
+                }
             });
+
             $("#dataAntrianSelesai").DataTable({
                 "responsive": true,
                 "autoWidth": false,
                 "order": [[ 0, "desc" ]],
-                "pageLength": 25,
+                "pageLength": 25
             });
 
-            //Menutup modal saat modal lainnya dibuka
+            // Menutup modal saat modal lainnya dibuka
             $('.modal').on('show.bs.modal', function (e) {
                 $('.modal').not($(this)).each(function () {
                     $(this).modal('hide');
@@ -698,25 +704,35 @@
             function initializeCountdowns() {
                 $('.countdown').each(function() {
                     var $this = $(this);
-                    // Stop any existing countdown
+                    var finalDate = $this.data('countdown');
+                    
+                    // Clear any existing countdown
                     if ($this.data('countdown-instance')) {
-                        $this.countdown('stop');
+                        try {
+                            $this.countdown('remove');
+                            $this.removeData('countdown-instance');
+                        } catch(e) {
+                            console.log('Error removing countdown:', e);
+                        }
                     }
 
-                    var finalDate = $(this).data('countdown');
                     try {
-                        $this.countdown(finalDate)
-                            .on('update.countdown', function(event) {
-                                if (event.offset.totalDays > 0) {
-                                    $this.html(event.strftime('%D hari %H:%M:%S'));
-                                } else {
-                                    $this.html(event.strftime('%H:%M:%S'));
-                                }
-                            })
-                            .on('finish.countdown', function() {
-                                $this.html('<span class="text-danger">TERLAMBAT</span>');
-                            });
-                        $this.data('countdown-instance', true);
+                        if (finalDate) {
+                            $this.countdown(finalDate)
+                                .on('update.countdown', function(event) {
+                                    if (event.offset.totalDays > 0) {
+                                        $(this).html(event.strftime('%D hari %H:%M:%S'));
+                                    } else {
+                                        $(this).html(event.strftime('%H:%M:%S'));
+                                    }
+                                })
+                                .on('finish.countdown', function() {
+                                    $(this).html('<span class="text-danger">TERLAMBAT</span>');
+                                });
+                            $this.data('countdown-instance', true);
+                        } else {
+                            $this.html('<span class="text-danger">BELUM DIANTRIKAN</span>');
+                        }
                     } catch (error) {
                         console.error('Error initializing countdown:', error);
                         $this.html('<span class="text-danger">BELUM DIANTRIKAN</span>');
@@ -726,12 +742,6 @@
 
             // Initial countdown initialization
             initializeCountdowns();
-
-            // Reinitialize countdowns after DataTable operations
-            table.on('draw', function() {
-                initializeCountdowns();
-            });
-
 
             $('.metodePembayaran').on('change', function(){
                 var id = $(this).attr('id').split('metodePembayaran')[1];

@@ -8,7 +8,7 @@
                 <div class="card-header">
                     <h3 class="card-title">My Offers</h3>
                     <div class="card-tools">
-                        <a href="{{ route('sales.offers.create') }}" class="btn btn-primary">Add New Offer</a>
+                        <a href="{{ route('sales.offers.create') }}" class="btn btn-primary">+ Add New Offer</a>
                     </div>
                 </div>
                 <div class="card-body">

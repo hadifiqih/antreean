@@ -24,22 +24,44 @@ class DailySalesReportController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        if(Auth::user()->role !== 'sales') {
-            $reports = DailyReport::with(['activities.activityType', 'offers.offer'])
-            ->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        }else{
-            $sales = Sales::where('user_id', Auth::id())->first();
-            $reports = DailyReport::with(['activities.activityType', 'offers.offer'])
-                ->where('sales_id', $sales->id)
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
+        $query = DailyReport::with(['activities.activityType', 'offers.offer', 'sales']);
+        
+        if (Auth::user()->role === 'sales') {
+            $query->where('sales_id', Auth::user()->sales->id);
+        } else {
+            // Filter by selected sales
+            if ($request->sales_id) {
+                $query->where('sales_id', $request->sales_id);
+            }
         }
         
-        return view('sales.reports.index', compact('reports'));
+        $reports = $query->whereMonth('created_at', date('m'))
+            ->whereYear('created_at', date('Y'))
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        
+        $antrians = Antrian::when(Auth::user()->role === 'sales', function($query) {
+                return $query->where('sales_id', Auth::user()->sales->id);
+            })
+            ->when($request->sales_id, function($query) use ($request) {
+                return $query->where('sales_id', $request->sales_id);
+            })
+            ->whereMonth('created_at', date('m'))
+            ->whereYear('created_at', date('Y'))
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(omset) as daily_omset'))
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // Get all sales for filter
+        $salesList = [];
+        if (Auth::user()->role !== 'sales') {
+            $salesList = Sales::with('user')->get();
+        }
+
+        return view('sales.reports.index', compact('reports', 'antrians', 'salesList'));
     }
 
     public function create()
@@ -90,7 +112,6 @@ class DailySalesReportController extends Controller
             $report = DailyReport::create([
                 'sales_id' => Auth::user()->sales->id,
                 'user_id' => Auth::id(),
-                'omset' => $request->omset,
                 'kendala' => $request->kendala ?? null,
                 'agendas' => $request->agendas ? array_map('trim', explode(',', $request->agendas)) : null
             ]);
@@ -114,15 +135,7 @@ class DailySalesReportController extends Controller
                         'daily_report_id' => $report->id,
                         'offer_id' => $offer['id'],
                         'is_prospect' => isset($offer['is_prospect']) ? true : false,
-                        'is_closing' => isset($offer['is_closing']) ? true : false,
                         'updates' => $updates
-                    ]);
-
-                    // Update the corresponding offer with the updates
-                    Offer::where('id', $offer['id'])->update([
-                        'updates' => $updates,
-                        'is_closing' => isset($offer['is_closing']) ? true : false,
-                        'is_prospect' => isset($offer['is_prospect']) ? true : false
                     ]);
                 }
             }
@@ -156,10 +169,12 @@ class DailySalesReportController extends Controller
     {
         $report->load(['activities.activityType', 'offers.offer']);
         $antrians = Antrian::with(['job'])->where('sales_id', $report->sales_id)
-            ->whereDate('created_at', $report->created_at->format('Y-m-d'))
+            ->whereDate('created_at', $report->created_at)
             ->get();
+        
+        $todayOmset = $antrians->sum('omset');
             
-        return view('sales.reports.show', compact('report', 'antrians'));
+        return view('sales.reports.show', compact('report', 'antrians', 'todayOmset'));
     }
 
     public function edit(DailyReport $report)
@@ -200,7 +215,6 @@ class DailySalesReportController extends Controller
         DB::beginTransaction();
         try {
             $report->update([
-                'omset' => $request->omset,
                 'kendala' => $request->kendala,
                 'agendas' => $request->agendas ? array_map('trim', explode(',', $request->agendas)) : null
             ]);
@@ -287,17 +301,52 @@ class DailySalesReportController extends Controller
         $startDate = $request->get('start_date', date('Y-m-d', strtotime('-30 days')));
         $endDate = $request->get('end_date', date('Y-m-d'));
         
-        $sales = Sales::where('user_id', Auth::id())->first();
+        // Initialize query for sales
+        $salesQuery = Sales::query();
+        
+        if (Auth::user()->role === 'sales') {
+            $salesQuery->where('user_id', Auth::id());
+        } elseif ($request->has('sales_id') && $request->sales_id) {
+            $salesQuery->where('id', $request->sales_id);
+        }
+        
+        $salesIds = $salesQuery->pluck('id');
         
         // Get reports for the date range
         $reports = DailyReport::with(['activities.activityType', 'offers'])
-            ->where('sales_id', $sales->id)
+            ->whereIn('sales_id', $salesIds)
             ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+            ->get();
+
+        $totalOmset = Antrian::whereIn('sales_id', $salesIds)
+            ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(omset) as daily_omset'))
+            ->groupBy('date')
+            ->get();
+
+        $monthlyOmset = Antrian::whereIn('sales_id', $salesIds)
+            ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+            ->sum('omset');
+
+        // Calculate activity types distribution
+        $activityTypeStats = DB::table('activity_types')
+            ->leftJoin('daily_activities', 'activity_types.id', '=', 'daily_activities.activity_type_id')
+            ->leftJoin('daily_reports', 'daily_activities.daily_report_id', '=', 'daily_reports.id')
+            ->whereIn('daily_reports.sales_id', $salesIds)
+            ->whereBetween('daily_reports.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+            ->select(
+                'activity_types.id',
+                'activity_types.name',
+                DB::raw('COUNT(daily_activities.id) as daily_activities_count')
+            )
+            ->groupBy('activity_types.id', 'activity_types.name')
+            ->having('daily_activities_count', '>', 0)
             ->get();
 
         // Calculate summary statistics
         $summary = [
-            'total_omset' => $reports->sum('omset'),
+            'total_omset' => $totalOmset,
+            'monthly_omset' => $monthlyOmset,
             'total_activities' => $reports->sum(function($report) {
                 return $report->activities->count();
             }),
@@ -311,23 +360,24 @@ class DailySalesReportController extends Controller
                     : 0;
             }) / ($reports->count() ?: 1),
             
-            // Activity types distribution with proper counting
-            'activity_types' => ActivityType::select('id', 'name')
-                ->withCount(['dailyActivities' => function($query) use ($reports) {
-                    $query->whereIn('daily_report_id', $reports->pluck('id'));
-                }])
-                ->having('daily_activities_count', '>', 0)
-                ->get(),
+            // Updated activity types collection
+            'activity_types' => $activityTypeStats,
             
             // Daily omset data
-            'daily_omset' => $reports->map(function($report) {
+            'daily_omset' => $totalOmset->map(function($item) {
                 return [
-                    'date' => $report->created_at->format('d M'),
-                    'omset' => $report->omset
+                    'date' => Carbon::parse($item->date)->format('d M'),
+                    'omset' => $item->daily_omset
                 ];
             })->sortBy('date')->values()
         ];
 
-        return view('sales.reports.summary', compact('summary'));
+        // Get salesList for filter if not sales role
+        $salesList = [];
+        if (Auth::user()->role !== 'sales') {
+            $salesList = Sales::with('user')->get();
+        }
+
+        return view('sales.reports.summary', compact('summary', 'salesList'));
     }
 }

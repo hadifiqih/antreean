@@ -201,12 +201,14 @@
     function initializeCountdowns() {
         $('[data-countdown]').each(function() {
             var $this = $(this);
-            // Stop any existing countdown
+            var finalDate = $(this).data('countdown');
+            
+            // Clear any existing countdown
             if ($this.data('countdown-instance')) {
-                $this.countdown('stop');
+                $this.countdown('remove');
+                $this.removeData('countdown-instance');
             }
 
-            var finalDate = $(this).data('countdown');
             try {
                 $this.countdown(finalDate)
                     .on('update.countdown', function(event) {
@@ -238,8 +240,9 @@
             "autoWidth": false,
             "responsive": true,
             "drawCallback": function() {
-                // Reinitialize countdowns after table draw
-                initializeCountdowns();
+                setTimeout(function() {
+                    initializeCountdowns();
+                }, 0);
             }
         });
 
@@ -253,8 +256,19 @@
             "autoWidth": false,
             "responsive": true,
             "drawCallback": function() {
-                initializeCountdowns();
+                setTimeout(function() {
+                    initializeCountdowns();
+                }, 0);
             }
+        });
+
+        // Clear all countdowns before page unload
+        $(window).on('beforeunload', function() {
+            $('[data-countdown]').each(function() {
+                if ($(this).data('countdown-instance')) {
+                    $(this).countdown('remove');
+                }
+            });
         });
 
         // Handle tab changes

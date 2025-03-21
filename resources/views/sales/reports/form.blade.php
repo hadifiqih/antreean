@@ -4,21 +4,7 @@
         @method('PUT')
     @endif
 
-    <div class="form-group">
-        <label for="omset">Omset Hari Ini</label>
-
-        <div class="input-group">
-            <div class="input-group-prepend">
-                <span class="input-group-text">Rp</span>
-            </div>
-            <input type="number" name="omset" id="omset" class="form-control @error('omset') is-invalid @enderror" required value="{{ $report->omset ?? old('omset') }}">
-            @error('omset')
-            <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-    </div>
-
-    <div class="card mt-4">
+    <div class="card">
         <div class="card-header">
             <h4 class="card-title">Aktifitas</h4>
         </div>
@@ -101,11 +87,6 @@
                                         <input type="checkbox" name="offers[{{ $index }}][is_prospect]" class="form-check-input"
                                             {{ $dailyOffer->is_prospect ? 'checked' : '' }}>
                                         <label class="form-check-label">Hot Prospek</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" name="offers[{{ $index }}][is_closing]" class="form-check-input"
-                                            {{ $dailyOffer->offer->is_closing ? 'checked' : '' }}>
-                                        <label class="form-check-label">Sudah Closing</label>
                                     </div>
                                 </div>
                             </div>

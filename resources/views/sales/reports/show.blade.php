@@ -26,7 +26,7 @@
                                 </tr>
                                 <tr>
                                     <th>Omset Harian</th>
-                                    <td>Rp {{ number_format($report->omset, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($todayOmset, 0, ',', '.') }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -117,6 +117,7 @@
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr>
+                                            <th>Tanggal</th>
                                             <th>Pekerjaan</th>
                                             <th>Harga</th>
                                             <th>Jumlah</th>
@@ -127,6 +128,7 @@
                                     <tbody>
                                         @forelse($antrians as $order)
                                         <tr>
+                                            <td>{{ $order->created_at->format('d M Y') }}</td>
                                             <td>{{ $order->job->job_name }}</td>
                                             <td>Rp {{ number_format($order->harga_produk, 0, ',', '.') }}</td>
                                             <td>{{ $order->qty }}</td>
@@ -196,15 +198,17 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <h4>Agenda Besok</h4>
-                            @if($report->agendas)
-                                <ul class="list-unstyled">
-                                    @foreach($report->agendas as $agenda)
-                                        <li>• {{ $agenda }}</li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <p>-</p>
-                            @endif
+                            <div class="bg-gray p-2">
+                                @if($report->agendas)
+                                    <ul class="list-unstyled">
+                                        @foreach($report->agendas as $agenda)
+                                            <li>• {{ $agenda }}</li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p>-</p>
+                                @endif
+                            </div>
                         </div>
                     </div>
 

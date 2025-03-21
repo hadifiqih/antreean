@@ -7,9 +7,9 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Edit Sales Report</h3>
+                    <h3 class="card-title">Edit Laporan Harian</h3>
                     <div class="card-tools">
-                        <a href="{{ route('sales.reports.index') }}" class="btn btn-secondary">Back to List</a>
+                        <a href="{{ route('sales.reports.index') }}" class="btn btn-secondary">Kembali ke Daftar</a>
                     </div>
                 </div>
                 <div class="card-body">

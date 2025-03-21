@@ -48,7 +48,6 @@ class OfferController extends Controller
             'qty' => 'nullable|numeric|min:0',
             'total' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
-            'updates' => 'nullable|string',
         ]);
 
         $offer = new Offer();
@@ -59,7 +58,6 @@ class OfferController extends Controller
         $offer->qty = $request->qty;
         $offer->total = $request->total;
         $offer->description = $request->description;
-        $offer->updates = $request->updates ? explode(',', $request->updates) : null;
         $offer->save();
 
         return redirect()->route('sales.offers.index')
@@ -85,7 +83,6 @@ class OfferController extends Controller
             'qty' => 'nullable|numeric|min:0',
             'total' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
-            'updates' => 'nullable|string',
         ]);
 
         $offer->job_id = $request->job_id;
@@ -94,7 +91,6 @@ class OfferController extends Controller
         $offer->qty = $request->qty;
         $offer->total = $request->total;
         $offer->description = $request->description;
-        $offer->updates = $request->updates ? explode(',', $request->updates) : null;
         $offer->save();
 
         return redirect()->route('sales.offers.index')
