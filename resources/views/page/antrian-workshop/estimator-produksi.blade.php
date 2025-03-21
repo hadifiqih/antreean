@@ -117,7 +117,7 @@
                             <tr>
                                 <td>File Cetak</td>
                                 <td>{{ $antrian->order->file_cetak }}</td>
-                                <td><a href="{{ route('design.download', $antrian->id) }}" class="btn btn-primary">Unduh</a></td>
+                                <td><a href="{{ asset('storage/file-cetak/'.$antrian->order->file_cetak) }}" download class="btn btn-primary">Unduh</a></td>
                             </tr>
                         </tbody>
                     </table>
