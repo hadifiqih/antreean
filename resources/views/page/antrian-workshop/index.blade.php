@@ -53,17 +53,9 @@
                                             <th scope="col">Sales</th>
                                             <th scope="col">Nama Customer</th>
                                             <th scope="col">Jenis Produk</th>
-                                            <th scope="col">Qty</th>
                                             <th scope="col">Deadline</th>
-                                            <th scope="col">File Desain</th>
-                                            @if(auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
-                                            <th scope="col">File Produksi</th>
-                                            @endif
                                             <th scope="col">Desainer</th>
-                                            <th scope="col">Operator</th>
-                                            <th scope="col">Finishing</th>
-                                            <th scope="col">QC</th>
-                                            <th scope="col">Tempat</th>
+                                            <th scope="col">Tempat Pengerjaan</th>
                                             <th scope="col">Catatan Admin</th>
                                             @if(auth()->user()->role == 'admin')
                                                 <th scope="col">Aksi</th>
@@ -89,57 +81,10 @@
                                                 </td>
                                                 <td>{{ $antrian->customer->nama }}</td>
                                                 <td>{{ $antrian->job->job_name }} <a href="{{ route('antrian.estimator-produksi', $antrian->ticket_order) }}" type="button" class="btn btn-sm btn-primary" target="_blank"><i class="fas fa-info-circle"></i></a></td>
-                                                <td>{{ $antrian->qty }}</td>
 
                                                 <td class="text-center">
                                                     <span class="countdown" data-countdown="{{ $antrian->end_job }}">Loading..</span>
                                                 </td>
-
-                                                {{-- File dari Desainer --}}
-                                                <td class="text-center">
-                                                    @php
-                                                        $isRevisi = $antrian->order->ada_revisi ?? null;
-                                                        $linkFile = $antrian->order->link_file ?? null;
-                                                    @endphp
-
-                                                    @if(!$linkFile) <!-- Jika link file null -->
-                                                        @if($isRevisi == 0)
-                                                            <a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a>
-                                                        @elseif($isRevisi == 1)
-                                                            <span class="text-danger text-sm">(Sedang Direvisi)</span>
-                                                        @elseif($isRevisi == 2)
-                                                            <a class="btn btn-success btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a>
-                                                            <span class="text-danger text-sm">(Sudah Direvisi)</span>
-                                                        @endif
-                                                    @else <!-- Jika link file ada -->
-                                                        @if($isRevisi == 0)
-                                                            <a class="btn btn-dark btn-sm" href="{{ $linkFile }}" target="_blank">Akses Link</a>
-                                                        @elseif($isRevisi == 1)
-                                                            <span class="text-danger text-sm">(Sedang Direvisi)</span>
-                                                        @elseif($isRevisi == 2)
-                                                            <a class="btn btn-success btn-sm" href="{{ $linkFile }}" target="_blank">Akses Link</a>
-                                                            <span class="text-danger text-sm">(Sudah Direvisi)</span>
-                                                        @endif
-                                                    @endif
-                                                </td>
-
-
-                                                {{-- File dari Produksi --}}
-                                                @if(auth()->user()->role == 'admin' || auth()->user()->role == 'stempel' || auth()->user()->role == 'advertising')
-                                                    @if($antrian->design_id != null && $antrian->is_aman == 1)
-                                                        <td>
-                                                            <a class="btn bg-indigo btn-sm" href="{{ route('antrian.downloadProduksi', $antrian->id) }}" target="_blank">Download</a>
-                                                        </td>
-                                                    @elseif($antrian->design_id == null && $antrian->is_aman == 1)
-                                                        <td>
-                                                            <p class="text-success"><i class="fas fa-check-circle"></i> File Desain Aman</p>
-                                                        </td>
-                                                    @elseif($antrian->design_id == null && $antrian->is_aman == 0)
-                                                        <td>
-                                                            <a class="text-danger" href="#">File Desain Dalam Pengecekan</a>
-                                                        </td>
-                                                    @endif
-                                                @endif
 
                                                 <td>
                                                     {{-- Nama Desainer --}}
@@ -150,75 +95,6 @@
                                                     @endif
                                                 </td>
 
-                                                <td>
-                                                    @if($antrian->operator_id != null)
-                                                    @php
-                                                        $operatorId = explode(',', $antrian->operator_id);
-                                                        foreach ($operatorId as $item) {
-                                                            if($item == 'rekanan'){
-                                                                echo '- Rekanan';
-                                                            }
-                                                            else{
-                                                                $antriann = App\Models\Employee::find($item);
-                                                                //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
-                                                                if($antriann->id == end($operatorId)){
-                                                                    echo '- ' . $antriann->name;
-                                                                }
-                                                                else{
-                                                                    echo '- ' . $antriann->name . "<br>";
-                                                                }
-                                                            }
-                                                        }
-                                                    @endphp
-                                                    @else
-                                                    -
-                                                    @endif
-                                                </td>
-
-                                                <td>
-                                                    @if($antrian->finisher_id != null)
-                                                    @php
-                                                        $finisherId = explode(',', $antrian->finisher_id);
-                                                        foreach ($finisherId as $item) {
-                                                            if($item == 'rekanan'){
-                                                                echo '- Rekanan';
-                                                            }
-                                                            else{
-                                                                $antriann = App\Models\Employee::find($item);
-                                                                //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
-                                                                if($antriann->id == end($finisherId)){
-                                                                    echo '- ' . $antriann->name;
-                                                                }
-                                                                else{
-                                                                    echo '- ' . $antriann->name . "<br>";
-                                                                }
-                                                            }
-                                                        }
-                                                    @endphp
-                                                    @else
-                                                    -
-                                                    @endif
-                                                </td>
-
-                                                <td>
-                                                    @if($antrian->qc_id)
-                                                    @php
-                                                        $qcId = explode(',', $antrian->qc_id);
-                                                        foreach ($qcId as $item) {
-                                                                $antriann = App\Models\Employee::find($item);
-                                                                //tampilkan name dari tabel employees, jika nama terakhir tidak perlu koma
-                                                                if($antriann->id == end($qcId)){
-                                                                    echo '- ' . $antriann->name;
-                                                                }
-                                                                else{
-                                                                    echo '- ' . $antriann->name . "<br>";
-                                                                }
-                                                            }
-                                                    @endphp
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </td>
                                                 <td>
                                                     @php
                                                         $tempat = explode(',', $antrian->working_at);
@@ -329,11 +205,6 @@
                                             <th scope="col">Nama Customer</th>
                                             <th scope="col">Sales</th>
                                             <th scope="col">Jenis Produk</th>
-                                            <th scope="col">Desain</th>
-                                            <th scope="col">Dokumentasi</th>
-                                            @if(auth()->user()->role == 'sales' || auth()->user()->role == 'staffAdmin' || auth()->user()->role == 'adminKeuangan')
-                                            <th scope="col">Pelunasan</th>
-                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -348,137 +219,6 @@
                                                     @endif
                                                 </td>
                                                 <td>{{ $antrian->job->job_name }} <a href="{{ route('antrian.estimator-produksi', $antrian->ticket_order) }}" type="button" class="btn btn-sm btn-primary" target="_blank"><i class="fas fa-info-circle"></i></a></td>
-
-                                                <td class="text-center">
-                                                    @if($antrian->order->ada_revisi == 0 && $antrian->order)
-                                                    <a class="btn btn-dark btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a>
-                                                    @elseif($antrian->order->ada_revisi == 1 && $antrian->order)
-                                                    <a class="btn btn-warning btn-sm disabled" href="#">Download</a><span class="text-danger">(Sedang Direvisi)</span>
-                                                    @elseif($antrian->order->ada_revisi == 2 && $antrian->order)
-                                                    <a class="btn btn-success btn-sm" href="{{ route('design.download', $antrian->id) }}">Download</a><div class="text-danger text-sm">(Terdapat Revisi)</div>
-                                                    @endif
-                                                </td>
-
-                                                <td class="text-center">
-                                                    @if($antrian->timer_stop != null)
-                                                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#selesaiProgress{{ $antrian->id }}">Lihat</button>
-                                                        <div class="modal fade" id="selesaiProgress{{ $antrian->id }}">
-                                                            <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                <h4 class="modal-title">Dokumentasi Hasil Produksi</h4>
-                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                    <span aria-hidden="true">&times;</span>
-                                                                </button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <div class="mb-3">
-                                                                    <p><strong>Gambar</strong></p>
-                                                                        @if($antrian->timer_stop != null)
-                                                                        @php
-                                                                            $dokumentasi = App\Models\Documentation::where('antrian_id', $antrian->id)->orderBy('created_at', 'desc')->get();
-                                                                        @endphp
-                                                                        @foreach ($dokumentasi as $gambar)
-                                                                            <img loading="lazy" src="{{ asset('storage/dokumentasi/'.$gambar->filename) }}" alt="" class="img-fluid p-3">
-                                                                        @endforeach
-                                                                        @else
-                                                                        <p class="text-danger">Tidak ada gambar</p>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-                                                                <div class="modal-footer justify-content-between">
-                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>
-                                                                </div>
-                                                            </div>
-                                                            <!-- /.modal-content -->
-                                                            </div>
-                                                            <!-- /.modal-dialog -->
-                                                        </div>
-                                                        <!-- /.modal -->
-                                                    @else
-                                                        -
-                                                    @endif
-                                                </td>
-                                                @if(auth()->user()->role == 'sales' || auth()->user()->role == 'staffAdmin' || auth()->user()->role == 'adminKeuangan')
-                                                <td>
-                                                        @php
-                                                            $latestPayment = App\Models\Payment::where('ticket_order', $antrian->ticket_order)->latest()->first();
-                                                        @endphp
-                                                        @if($latestPayment->payment_status == 'Belum Bayar' || $latestPayment->payment_status == 'DP')
-                                                            @if(auth()->user()->role == 'sales')
-                                                                <button id="btnModalPelunasan{{ $antrian->id }}" class="btn btn-sm btn-danger btnModalPelunasan" data-toggle="modal" data-target="#modalPelunasan{{ $antrian->id }}"><i class="fas fa-upload"></i> Pelunasan</button>
-                                                                @includeIf('page.antrian-workshop.modal-pelunasan')
-                                                            @elseif(auth()->user()->role == 'staffAdmin' || auth()->user()->role == 'adminKeuangan')
-                                                                <button class="btn btn-sm btn-secondary disabled"> Belum Pelunasan</button>
-                                                            @endif
-                                                        @elseif($latestPayment->payment_status == 'Lunas')
-                                                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#modalTampilBP{{ $antrian->id }}"><i class="fas fa-check-circle"></i> Lihat</button>
-                                                            <!-- Modal -->
-                                                            <div class="modal fade" id="modalTampilBP{{ $antrian->id }}" tabindex="-1" aria-labelledby="TampilBPLabel{{ $antrian->id }}" aria-hidden="true">
-                                                                <div class="modal-dialog">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                    <h5 class="modal-title" id="TampilBPLabel{{ $antrian->id }}">Data Pembayaran</h5>
-                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                        <span aria-hidden="true">&times;</span>
-                                                                    </button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        <h5 class="bg-danger p-2 rounded"><strong>Total Omset : </strong>Rp {{ number_format($antrian->omset, 0, ',', '.') }}</h5>
-                                                                        <hr>
-                                                                        @php
-                                                                            $buktiPembayaran = App\Models\Payment::where('ticket_order', $antrian->ticket_order)->get();
-                                                                        @endphp
-                                                                        @foreach ($buktiPembayaran as $bukti)
-                                                                            <table class="table table-borderless table-responsive">
-                                                                                <tr>
-                                                                                    <th>Tanggal Pembayaran</th>
-                                                                                    <td>{{ $bukti->created_at }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Status Pembayaran</th>
-                                                                                    <td>{{ $bukti->payment_status }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Metode Pembayaran</th>
-                                                                                    <td>{{ $bukti->payment_method }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Jumlah Pembayaran</th>
-                                                                                    <td>Rp {{ number_format($bukti->payment_amount, 0, ',', '.') }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Biaya Pengiriman</th>
-                                                                                    <td>Rp {{ number_format($bukti->shipping_cost, 0, ',', '.') }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Biaya Pemasangan</th>
-                                                                                    <td>Rp {{ number_format($bukti->installation_cost, 0, ',', '.') }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Sisa Pembayaran</th>
-                                                                                    <td>Rp {{ number_format($bukti->remaining_payment, 0, ',', '.') }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <th>Bukti Pembayaran</th>
-                                                                                    <td>
-                                                                                        <a href="{{ $bukti->payment_proof != null ? asset('storage/bukti-pembayaran/'.$bukti->payment_proof) : "#" }}" target="_blank">
-                                                                                            {{ $bukti->payment_proof == null ? "-" : $bukti->payment_proof }}
-                                                                                        </a>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </table>
-                                                                        @endforeach
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                                                                    </div>
-                                                                </div>
-                                                                </div>
-                                                            </div>
-                                                        @endif
-                                                </td>
-                                                @endif
                                             </tr>
                                         @endforeach
                                     </tbody>

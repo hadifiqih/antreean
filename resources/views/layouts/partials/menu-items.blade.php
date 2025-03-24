@@ -16,8 +16,10 @@
     @include('layouts.partials.menus.desain-menu')
 @elseif(Auth::user()->role == 'stempel' || Auth::user()->role == 'advertising' || Auth::user()->role == 'estimator')
     @include('layouts.partials.menus.operator-menu')
-@elseif(Auth::user()->role == 'ceo' || Auth::user()->role == 'dirut')
+@elseif(Auth::user()->role == 'ceo' || Auth::user()->role == 'direktur')
     @include('layouts.partials.menus.management-menu')
+@elseif(Auth::user()->role == 'keuangan')
+    @include('layouts.partials.menus.keuangan-menu')
 @endif
 
 <!-- Logout -->

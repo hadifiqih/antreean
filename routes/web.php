@@ -27,8 +27,10 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Notification;
 use App\Http\Controllers\DataAnalisController;
+use App\Http\Controllers\InstallmentController;
 use App\Http\Controllers\DocumentationController;
 use App\Http\Controllers\Operator\TaskController;
+use App\Http\Controllers\AdditionalCostController;
 use App\Http\Controllers\DailySalesReportController;
 
 /*
@@ -253,9 +255,12 @@ Route::controller(AntrianController::class)->group(function(){
 
 });
 
-Route::controller(PaymentController::class)->group(function(){
-    Route::post('/payment/pelunasan', 'updatePelunasan')->name('payment.pelunasan');
-});
+Route::resource('/installments', InstallmentController::class)->except(['create', 'edit']);
+
+Route::resource('/additional-costs', AdditionalCostController::class)->except(['create', 'edit']);
+
+Route::resource('/payments', PaymentController::class)->except(['create', 'edit']);
+Route::get('/validasi-pembayaran', [PaymentController::class, 'validatePayment'])->name('payments.validation');
 
 Route::controller(ProductController::class)->group(function(){
     Route::get('/product', 'index')->name('product.index');
@@ -299,11 +304,6 @@ Route::controller(UserController::class)->group(function(){
 
 Route::resource('task', TaskController::class)->middleware('auth');
 Route::put('task/{ticket}/complete', [TaskController::class, 'complete'])->name('task.complete')->middleware('auth');
-
-Route::controller(DataAnalisController::class)->group(function(){
-    Route::get('/data-analis/produk-terlaris', 'produkTerlaris')->name('produkTerlaris');
-    Route::get('/data-analis/omset-percabang', 'omsetPerCabang')->name('omsetPerCabang');
-});
 
 Route::get('/error', function () {
     //menampilkan halaman error dan error message

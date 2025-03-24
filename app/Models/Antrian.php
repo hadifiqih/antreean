@@ -75,11 +75,6 @@ class Antrian extends Model
         return $this->belongsTo(Employee::class, 'qc_id');
     }
 
-    public function design()
-    {
-        return $this->belongsTo(Design::class);
-    }
-
     public function job()
     {
         return $this->belongsTo(Job::class);

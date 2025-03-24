@@ -28,7 +28,6 @@
                                 <th>Nomor Tiket</th>
                                 <th>Pelanggan</th>
                                 <th>Jenis Pekerjaan</th>
-                                <th>Jumlah</th>
                                 <th>Batas Waktu</th>
                                 <th>Workshop</th>
                                 <th>Status</th>
@@ -41,7 +40,6 @@
                                 <td>{{ $task->ticket_order }}</td>
                                 <td>{{ $task->customer->nama }}</td>
                                 <td>{{ $task->job->job_name }}</td>
-                                <td>{{ $task->qty }}</td>
                                 <td>
                                     <span class="countdown" data-countdown="{{ $task->end_job }}">Loading...</span>
                                 </td>
@@ -117,9 +115,9 @@
                                         <td>
                                             <div class="btn-group">
                                                 <a href="{{ route('antrian.estimator-produksi', $task->ticket_order) }}"
-                                                   class="btn btn-sm btn-info"
-                                                   target="_blank"
-                                                   title="Lihat Detail">
+                                                    class="btn btn-sm btn-info"
+                                                    target="_blank"
+                                                    title="Lihat Detail">
                                                     <i class="fas fa-info-circle"></i>
                                                 </a>
                                                 @if($task->status == '1')
@@ -202,7 +200,7 @@
         $('[data-countdown]').each(function() {
             var $this = $(this);
             var finalDate = $(this).data('countdown');
-            
+
             // Safely destroy any existing countdown
             try {
                 if ($this.data('countdown-instance')) {
@@ -214,7 +212,7 @@
 
             // Reset the instance flag
             $this.removeData('countdown-instance');
-            
+
             // Initialize new countdown
             try {
                 var countDate = new Date(finalDate);
@@ -261,7 +259,7 @@
                     } catch (e) {}
                     $(this).removeData('countdown-instance');
                 });
-                
+
                 // Initialize new countdowns
                 setTimeout(function() {
                     initializeCountdowns();

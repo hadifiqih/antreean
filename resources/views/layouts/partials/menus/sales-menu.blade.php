@@ -1,19 +1,35 @@
 <!-- Orders -->
-<li class="nav-item">
-    <a href="{{ route('antrian.index') }}" class="nav-link {{ Request::is('antrian*') && !Request::is('antrian/search') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-shopping-cart"></i>
-        <p>Antrian</p>
+<li class="nav-item {{ Request::is('antrian*') || Request::is('antrian/search') || Request::is('payments*') ? 'menu-open' : '' }}">
+    <a href="#" class="nav-link {{ Request::is('antrian*') || Request::is('antrian/search') || Request::is('payments*') ? 'active' : '' }}">
+      <i class="nav-icon fas fas fa-shopping-cart"></i>
+      <p>
+        Orderan
+        <i class="right fas fa-angle-left"></i>
+      </p>
     </a>
+    <ul class="nav nav-treeview">
+        <li class="nav-item">
+            <a href="{{ route('antrian.index') }}" class="nav-link {{ Request::is('antrian*') && !Request::is('antrian/search') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Antrian</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('payments.index') }}" class="nav-link {{ Request::is('payments*') ? 'active' : '' }}">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Pembayaran</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('antrian.cariOrder') }}" class="nav-link {{ Request::is('antrian/search') ? 'active' : '' }}">
+                <i class="nav-icon far fa-circle"></i>
+                <p>Cari Order</p>
+            </a>
+        </li>
+    </ul>
 </li>
 
 {{-- Cari Order Berdasarkan Tiket --}}
-<li class="nav-item">
-    <a href="{{ route('antrian.cariOrder') }}" class="nav-link {{ Request::is('antrian/search') ? 'active' : '' }}">
-        <i class="nav-icon fas fa-search"></i>
-        <p>Cari Order</p>
-    </a>
-</li>
-
 <li class="nav-item">
     <a href="{{ route('design.index') }}" class="nav-link {{ Request::is('design*') ? 'active' : '' }}">
         <i class="nav-icon fas fa-pen"></i>

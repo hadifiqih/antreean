@@ -53,7 +53,7 @@ class AntrianController extends Controller
 
     public function estimatorProduksi(string $id)
     {
-        $antrian = Antrian::with(['payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])->where('ticket_order', $id)->first();
+        $antrian = Antrian::with(['payment', 'order', 'sales', 'customer', 'job', 'operator', 'finishing'])->where('ticket_order', $id)->first();
         return view('page.antrian-workshop.estimator-produksi', compact('antrian'));
     }
 
@@ -66,11 +66,11 @@ class AntrianController extends Controller
             case 'sales':
                 $sales = Sales::where('user_id', $user->id)->first();
                 $salesId = $sales->id;
-                $activeQuery = Antrian::with(['payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])
+                $activeQuery = Antrian::with(['order', 'sales', 'customer', 'job'])
                     ->orderByDesc('created_at')
                     ->where('status', '1')
                     ->where('sales_id', $salesId);
-                $completedQuery = Antrian::with(['sales', 'customer', 'job', 'design', 'operator', 'finishing', 'order'])
+                $completedQuery = Antrian::with(['sales', 'customer', 'job', 'order', 'payment'])
                     ->orderByDesc('created_at')
                     ->where('status', '2')
                     ->where('sales_id', $salesId)
@@ -80,28 +80,28 @@ class AntrianController extends Controller
             case 'dokumentasi':
             case 'stempel':
             case 'advertising':
-                $activeQuery = Antrian::with(['payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])
+                $activeQuery = Antrian::with(['order', 'sales', 'customer', 'job'])
                     ->orderByDesc('created_at')
                     ->where('status', '1');
-                $completedQuery = Antrian::with(['sales', 'customer', 'job', 'design', 'operator', 'finishing', 'order'])
+                $completedQuery = Antrian::with(['sales', 'customer', 'job', 'order'])
                     ->orderByDesc('created_at')
                     ->where('status', '2')
                     ->take(25);
                 break;
             case 'estimator':
-                $activeQuery = Antrian::with(['payment', 'sales', 'customer', 'job', 'design', 'operator', 'finishing', 'dokumproses'])
+                $activeQuery = Antrian::with(['sales', 'customer', 'job', 'dokumproses'])
                     ->orderByDesc('created_at')
                     ->where('status', '1');
-                $completedQuery = Antrian::with(['payment', 'sales', 'customer', 'job', 'design', 'operator', 'finishing', 'dokumproses'])
+                $completedQuery = Antrian::with(['sales', 'customer', 'job', 'dokumproses'])
                     ->orderByDesc('created_at')
                     ->where('status', '2')
                     ->whereBetween('created_at', [now()->subMonth(1), now()]);
                 break;
             default:
-                $activeQuery = Antrian::with(['payment', 'order', 'sales', 'customer', 'job', 'design', 'operator', 'finishing'])
+                $activeQuery = Antrian::with(['order', 'sales', 'customer', 'job'])
                     ->orderByDesc('created_at')
                     ->where('status', '1');
-                $completedQuery = Antrian::with(['sales', 'customer', 'job', 'design', 'operator', 'finishing', 'order'])
+                $completedQuery = Antrian::with(['sales', 'customer', 'job', 'order'])
                     ->orderByDesc('created_at')
                     ->where('status', '2')
                     ->whereBetween('created_at', [now()->subMonth(3), now()]);
@@ -246,29 +246,29 @@ class AntrianController extends Controller
     {
         try {
             $antrian = Antrian::findOrFail($id);
-            
+
             if (!$antrian->order || !$antrian->order->file_cetak) {
                 return redirect()->back()->with('error', 'File tidak ditemukan!');
             }
-    
+
             $file = $antrian->order->file_cetak;
-            
+
             // Path to external storage
             $externalPath = '/storage/app/public/file-cetak/' . $file;
-            
+
             // Check if file exists in external storage
             if (file_exists($externalPath)) {
                 return response()->download($externalPath);
             }
-            
+
             // Fallback to local storage
             $localPath = storage_path('app/public/file-cetak/' . $file);
             if (file_exists($localPath)) {
                 return response()->download($localPath);
             }
-    
+
             return redirect()->back()->with('error', 'File tidak ditemukan di server!');
-    
+
         } catch (\Exception $e) {
             \Log::error('File download error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat mengunduh file!');
