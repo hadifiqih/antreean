@@ -32,7 +32,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover" id="daily-report">
                             <thead>
                                 <tr>
                                     <th>Tanggal</th>
@@ -43,43 +43,70 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($reports as $report)
-                                <tr>
-                                    <td>{{ $report->created_at->format('d M Y') }}</td>
-                                    <td>Rp {{ number_format($antrians->get($report->created_at->format('Y-m-d'))?->daily_omset ?? 0 ,0, ',', '.') }}</td>
-                                    <td>{{ $report->activities->count() }} Aktivitas</td>
-                                    <td>{{ $report->offers->count() }} Penawaran</td>
-                                    <td>
-                                        <a href="{{ route('sales.reports.show', $report) }}" 
-                                           class="btn btn-sm btn-info {{ !request('sales_id') ? 'disabled' : '' }}" 
-                                           title="Lihat" 
-                                           {{ !request('sales_id') ? 'onclick="return false;"' : '' }}>
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        @if(Auth::user()->role == 'sales')
-                                        <a href="{{ route('sales.reports.edit', $report) }}" class="btn btn-sm btn-warning" title="Ubah">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route('sales.reports.destroy', $report) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin?')" title="Hapus">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                        @endif
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="text-center">Tidak ada laporan</td>
-                                </tr>
-                                @endforelse
+                                @if(Auth::user()->role != 'sales')
+                                    @forelse($reports as $report)
+                                    <tr>
+                                        <td>{{ $report->created_at->format('d M Y') }}</td>
+                                        <td>Rp {{ number_format($antrians->get($report->created_at->format('Y-m-d'))?->daily_omset ?? 0 ,0, ',', '.') }}</td>
+                                        <td>{{ $report->activities->count() }} Aktivitas</td>
+                                        <td>{{ $report->offers->count() }} Penawaran</td>
+                                        <td>
+                                            <a href="{{ route('sales.reports.show', $report) }}"
+                                                class="btn btn-sm btn-info {{ !request('sales_id') ? 'disabled' : '' }}"
+                                                title="Lihat"
+                                                {{ !request('sales_id') ? 'onclick="return false;"' : '' }}>
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if(Auth::user()->role == 'sales')
+                                                <a href="{{ route('sales.reports.edit', $report) }}" class="btn btn-sm btn-warning" title="Ubah">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{{ route('sales.reports.destroy', $report) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin?')" title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">Tidak ada laporan</td>
+                                    </tr>
+                                    @endforelse
+                                @else
+                                    @forelse($reports as $report)
+                                    <tr>
+                                        <td>{{ $report->created_at->format('d M Y') }}</td>
+                                        <td>Rp {{ number_format($antrians->get($report->created_at->format('Y-m-d'))?->daily_omset?? 0,0, ',', '.') }}</td>
+                                        <td>{{ $report->activities->count() }} Aktivitas</td>
+                                        <td>{{ $report->offers->count() }} Penawaran</td>
+                                        <td>
+                                            <a href="{{ route('sales.reports.show', $report) }}" class="btn btn-sm btn-info" title="Lihat">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('sales.reports.edit', $report) }}" class="btn btn-sm btn-warning" title="Ubah">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form action="{{ route('sales.reports.destroy', $report) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin?')" title="Hapus">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">Tidak ada laporan</td>
+                                    </tr>
+                                    @endforelse
+                                @endif
                             </tbody>
                         </table>
-                    </div>
-                    <div class="mt-3">
-                        {{ $reports->links() }}
                     </div>
                 </div>
             </div>
@@ -87,3 +114,11 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#daily-report').DataTable();
+        });
+    </script>
+@endpush

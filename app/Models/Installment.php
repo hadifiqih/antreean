@@ -18,6 +18,8 @@ class Installment extends Model
         'status',
         'proof_file',
         'validated_by',
+        'validated_at',
+        'is_rejected',
     ];
 
     public function paymentTransaction()

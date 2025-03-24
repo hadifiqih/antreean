@@ -27,7 +27,7 @@ class DailySalesReportController extends Controller
     public function index(Request $request)
     {
         $query = DailyReport::with(['activities.activityType', 'offers.offer', 'sales']);
-        
+
         if (Auth::user()->role === 'sales') {
             $query->where('sales_id', Auth::user()->sales->id);
         } else {
@@ -36,13 +36,13 @@ class DailySalesReportController extends Controller
                 $query->where('sales_id', $request->sales_id);
             }
         }
-        
+
         $reports = $query->whereMonth('created_at', date('m'))
             ->whereYear('created_at', date('Y'))
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
-        
-        $antrians = Antrian::when(Auth::user()->role === 'sales', function($query) {
+            ->get();
+
+        $antrians = Antrian::when(Auth::user()->role == 'sales', function($query) {
                 return $query->where('sales_id', Auth::user()->sales->id);
             })
             ->when($request->sales_id, function($query) use ($request) {
@@ -74,7 +74,7 @@ class DailySalesReportController extends Controller
                 })
                 ->get();
         }else{
-            
+
             $offers = Offer::where('sales_id', Auth::user()->sales->id)
                 ->where('is_closing', false)
                 ->whereDoesntHave('dailyOffers', function($query) {
@@ -101,7 +101,7 @@ class DailySalesReportController extends Controller
             $ads = [];
             \Log::error('Exception occurred while fetching ads: ' . $e->getMessage());
         }
-        
+
         return view('sales.reports.create', compact('activityTypes', 'offers', 'ads'));
     }
 
@@ -130,7 +130,7 @@ class DailySalesReportController extends Controller
             if ($request->has('offers')) {
                 foreach ($request->offers as $offer) {
                     $updates = isset($offer['updates']) ? explode(',', $offer['updates']) : null;
-                    
+
                     DailyOffer::create([
                         'daily_report_id' => $report->id,
                         'offer_id' => $offer['id'],
@@ -165,15 +165,24 @@ class DailySalesReportController extends Controller
         }
     }
 
-    public function show(DailyReport $report)
+    public function show($id)
     {
-        $report->load(['activities.activityType', 'offers.offer']);
-        $antrians = Antrian::with(['job'])->where('sales_id', $report->sales_id)
+        $report = DailyReport::with(['activities.activityType', 'offers.offer'])->findOrFail($id);
+
+        if(Auth::user()->role == 'sales') {
+            $antrians = Antrian::with(['job'])
+            ->where('sales_id', Auth::user()->sales->id)
             ->whereDate('created_at', $report->created_at)
             ->get();
-        
+        }else{
+            $antrians = Antrian::with(['job'])
+            ->where('sales_id', $report->sales_id)
+            ->whereDate('created_at', $report->created_at)
+            ->get();
+        }
+
         $todayOmset = $antrians->sum('omset');
-            
+
         return view('sales.reports.show', compact('report', 'antrians', 'todayOmset'));
     }
 
@@ -185,7 +194,7 @@ class DailySalesReportController extends Controller
                 $query->where('daily_report_id', '!=', $report->id);
             })
             ->get();
-            
+
         $adsReports = $report->adsReports()->get();
 
         try {
@@ -206,7 +215,7 @@ class DailySalesReportController extends Controller
             $ads = [];
             \Log::error('Exception occurred while fetching ads: ' . $e->getMessage());
         }
-        
+
         return view('sales.reports.edit', compact('report', 'activityTypes', 'offers', 'ads', 'adsReports'));
     }
 
@@ -235,7 +244,7 @@ class DailySalesReportController extends Controller
             if ($request->has('offers')) {
                 foreach ($request->offers as $offer) {
                     $updates = isset($offer['updates']) ? explode(',', $offer['updates']) : null;
-                    
+
                     DailyOffer::create([
                         'daily_report_id' => $report->id,
                         'offer_id' => $offer['id'],
@@ -286,7 +295,7 @@ class DailySalesReportController extends Controller
             $report->offers()->delete();
             $report->adsReports()->delete();
             $report->delete();
-            
+
             DB::commit();
             return redirect()->route('sales.reports.index')
                 ->with('success', 'Daily report deleted successfully');
@@ -300,18 +309,18 @@ class DailySalesReportController extends Controller
     {
         $startDate = $request->get('start_date', date('Y-m-d', strtotime('-30 days')));
         $endDate = $request->get('end_date', date('Y-m-d'));
-        
+
         // Initialize query for sales
         $salesQuery = Sales::query();
-        
+
         if (Auth::user()->role === 'sales') {
             $salesQuery->where('user_id', Auth::id());
         } elseif ($request->has('sales_id') && $request->sales_id) {
             $salesQuery->where('id', $request->sales_id);
         }
-        
+
         $salesIds = $salesQuery->pluck('id');
-        
+
         // Get reports for the date range
         $reports = DailyReport::with(['activities.activityType', 'offers'])
             ->whereIn('sales_id', $salesIds)
@@ -355,14 +364,14 @@ class DailySalesReportController extends Controller
             }),
             'prospect_rate' => $reports->sum(function($report) {
                 $totalOffers = $report->offers->count();
-                return $totalOffers > 0 
+                return $totalOffers > 0
                     ? ($report->offers->where('is_prospect', true)->count() / $totalOffers) * 100
                     : 0;
             }) / ($reports->count() ?: 1),
-            
+
             // Updated activity types collection
             'activity_types' => $activityTypeStats,
-            
+
             // Daily omset data
             'daily_omset' => $totalOmset->map(function($item) {
                 return [

@@ -27,6 +27,8 @@ return new class extends Migration
             $table->string('status')->default('unpaid'); // unpaid, paid
             $table->text('proof_file')->nullable(); // Bukti pembayaran cicilan
             $table->unsignedBigInteger('validated_by')->nullable(); // Tanggal pembayaran cicilan
+            $table->datetime('validated_at')->nullable(); // Tanggal pembayaran cicilan
+            $table->boolean('is_rejected')->default(false); // Status penolakan pembayaran cicilan
             $table->timestamps();
 
             $table->foreign('payment_transaction_id')->references('id')->on('payment_transactions')->onDelete('cascade');

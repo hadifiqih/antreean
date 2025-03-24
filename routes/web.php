@@ -261,6 +261,7 @@ Route::resource('/additional-costs', AdditionalCostController::class)->except(['
 
 Route::resource('/payments', PaymentController::class)->except(['create', 'edit']);
 Route::get('/validasi-pembayaran', [PaymentController::class, 'validatePayment'])->name('payments.validation');
+Route::put('/validasi-pembayaran/confirm/{id}', [PaymentController::class, 'confirmValidate'])->name('payments.confirmValidate');
 
 Route::controller(ProductController::class)->group(function(){
     Route::get('/product', 'index')->name('product.index');

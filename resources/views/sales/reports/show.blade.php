@@ -45,17 +45,23 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($report->activities as $activity)
-                                        <tr>
-                                            <td>{{ $activity->activityType->name }}</td>
-                                            <td>{{ $activity->description }}</td>
-                                            <td>{{ $activity->amount }}</td>
-                                        </tr>
-                                        @empty
-                                        <tr>
-                                            <td colspan="3" class="text-center">Tidak ada aktivitas tercatat</td>
-                                        </tr>
-                                        @endforelse
+                                        @if(isset($report->activities))
+                                            @forelse($report->activities as $activity)
+                                            <tr>
+                                                <td>{{ $activity->activityType->name }}</td>
+                                                <td>{{ $activity->description }}</td>
+                                                <td>{{ $activity->amount }}</td>
+                                            </tr>
+                                            @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center">Tidak ada aktivitas tercatat</td>
+                                            </tr>
+                                            @endforelse
+                                        @else
+                                            <tr>
+                                                <td colspan="3" class="text-center">Tidak ada aktivitas tercatat</td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>

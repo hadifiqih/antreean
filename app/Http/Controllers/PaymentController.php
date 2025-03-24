@@ -114,7 +114,30 @@ class PaymentController extends Controller
 
     public function validatePayment()
     {
-        $installments = Installment::whereNull('validated_by')->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->get(); // Ganti dengan model dan relasi yang sesuai
+        $installments = Installment::with('paymentTransaction')
+        ->whereNull('validated_by')
+        ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+        ->where('payment_method', '!=', 'Bayar Waktu Ambil')
+        ->where('is_rejected', 0)
+        ->get();
+
         return view('page.payments.validation', compact('installments'));
+    }
+
+    public function confirmValidate(Request $request ,$id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:approved,rejected',
+        ]);
+
+        if($validated['status'] == 'rejected'){
+            $installment = Installment::find($id);
+            $installment->update(['validated_by' => Auth::user()->id, 'validated_at' => now(), 'is_rejected' => 1]);
+            return back()->with('success', 'Pembayaran berhasil ditolak.');
+        }else{
+            $installment = Installment::find($id);
+            $installment->update(['validated_by' => Auth::user()->id, 'validated_at' => now(), 'is_rejected' => 0]);
+            return back()->with('success', 'Pembayaran berhasil divalidasi.');
+        }
     }
 }

@@ -35,7 +35,7 @@
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-    
+
     .loader {
         border: 3px solid #f3f3f3; /* Light grey */
         border-top: 3px solid #3498db; /* Blue */
@@ -94,7 +94,7 @@
               @foreach($segments as $segment)
                 @php
                   $url .= '/'.$segment;
-                  $segmentName = ucfirst(str_replace('-', ' ', $segment));
+                  $segmentName = ucwords(str_replace('-', ' ', $segment));
                 @endphp
                 @if($loop->last)
                   <li class="breadcrumb-item active">{{ $segmentName }}</li>
