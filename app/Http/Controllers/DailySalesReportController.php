@@ -157,8 +157,7 @@ class DailySalesReportController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('sales.reports.index')
-                ->with('success', 'Daily report created successfully');
+            return back()->with('success', 'Daily report created successfully');
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Error creating report: ' . $e->getMessage());
@@ -243,18 +242,11 @@ class DailySalesReportController extends Controller
             $report->offers()->delete();
             if ($request->has('offers')) {
                 foreach ($request->offers as $offer) {
-                    $updates = isset($offer['updates']) ? explode(',', $offer['updates']) : null;
-
                     DailyOffer::create([
                         'daily_report_id' => $report->id,
                         'offer_id' => $offer['id'],
                         'is_prospect' => isset($offer['is_prospect']) ? true : false,
-                        'updates' => $updates
-                    ]);
-
-                    Offer::where('id', $offer['id'])->update([
-                        'updates' => $updates,
-                        'is_prospect' => isset($offer['is_prospect']) ? true : false
+                        'updates' => $offer['updates'] ?? null
                     ]);
                 }
             }
