@@ -77,7 +77,6 @@
                                     <th>No. Order</th>
                                     <th>Total Omset</th>
                                     <th>Status</th>
-                                    <th>Bank</th>
                                     <th>Bukti</th>
                                     <th>Tanggal</th>
                                 </tr>
@@ -86,12 +85,11 @@
                                 @foreach($fullPayment as $index => $payment)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $payment->ticket_order }}</td>
-                                    <td>Rp {{ number_format($payment->total_payment, 0, ',', '.') }}</td>
+                                    <td>{{ $payment->antrian->ticket_order }}</td>
+                                    <td>Rp {{ number_format($payment->total_amount, 0, ',', '.') }}</td>
                                     <td><span class="badge bg-success">Lunas</span></td>
-                                    <td>{{ $payment->payment_method }}</td>
                                     <td>
-                                        <a href="{{ Storage::url($payment->payment_proof) }}" target="_blank" class="btn btn-sm btn-info">
+                                        <a href="{{ asset('storage/bukti-pembayaran/' . $payment->proof_file) }}" target="_blank" class="btn btn-sm btn-info">
                                             <i class="fas fa-image"></i>
                                         </a>
                                     </td>

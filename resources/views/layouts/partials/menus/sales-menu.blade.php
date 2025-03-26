@@ -14,12 +14,12 @@
                 <p>Antrian</p>
             </a>
         </li>
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a href="{{ route('payments.index') }}" class="nav-link {{ Request::is('payments*') ? 'active' : '' }}">
             <i class="far fa-circle nav-icon"></i>
             <p>Pembayaran</p>
             </a>
-        </li>
+        </li> --}}
         <li class="nav-item">
             <a href="{{ route('antrian.cariOrder') }}" class="nav-link {{ Request::is('antrian/search') ? 'active' : '' }}">
                 <i class="nav-icon far fa-circle"></i>
