@@ -20,7 +20,7 @@
                                     @endforeach
                                 </select>
                                 @endif
-                                <input type="date" name="start_date" class="form-control" value="{{ request('start_date', date('Y-m-d', strtotime('-30 days'))) }}">
+                                <input type="date" name="start_date" class="form-control" value="{{ request('start_date', date('Y-m-01')) }}">
                                 <input type="date" name="end_date" class="form-control" value="{{ request('end_date', date('Y-m-d')) }}">
                                 <div class="input-group-append">
                                     <button type="submit" class="btn btn-primary">Filter</button>

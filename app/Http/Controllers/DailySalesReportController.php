@@ -305,7 +305,7 @@ class DailySalesReportController extends Controller
 
     public function summary(Request $request)
     {
-        $startDate = $request->get('start_date', date('Y-m-d', strtotime('-30 days')));
+        $startDate = $request->get('start_date', date('Y-m-01'));
         $endDate = $request->get('end_date', date('Y-m-d'));
 
         // Initialize query for sales
