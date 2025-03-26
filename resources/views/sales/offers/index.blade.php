@@ -29,7 +29,6 @@
                                     <th>Jumlah</th>
                                     <th>Total</th>
                                     <th>Deskripsi</th>
-                                    <th>Update</th>
                                     <th width="150">Aksi</th>
                                 </tr>
                             </thead>
@@ -42,17 +41,6 @@
                                         <td>{{ $offer->qty ?? '-' }}</td>
                                         <td>{{ $offer->total ? number_format($offer->total, 0) : '-' }}</td>
                                         <td>{{ Str::limit($offer->description, 30) }}</td>
-                                        <td>
-                                            @if($offer->updates)
-                                                <ul class="list-unstyled m-0">
-                                                    @foreach($offer->updates as $update)
-                                                        <li>• {{ $update }}</li>
-                                                    @endforeach
-                                                </ul>
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
                                         <td>
                                             <a href="{{ route('sales.offers.edit', $offer) }}" class="btn btn-sm btn-info">Edit</a>
                                             <form action="{{ route('sales.offers.destroy', $offer) }}" method="POST" class="d-inline">

@@ -23,11 +23,11 @@
                                 </select>
                             </div>
                             <div class="col-12 col-md-4 mb-2 mb-md-0">
-                                <input type="text" name="activities[{{ $index }}][description]" class="form-control" 
+                                <input type="text" name="activities[{{ $index }}][description]" class="form-control"
                                     placeholder="Description" value="{{ $activity->description }}" required>
                             </div>
                             <div class="col-10 col-md-3 mb-2 mb-md-0">
-                                <input type="number" name="activities[{{ $index }}][amount]" class="form-control" 
+                                <input type="number" name="activities[{{ $index }}][amount]" class="form-control"
                                     placeholder="Amount" value="{{ $activity->amount }}" required>
                             </div>
                             <div class="col-2 col-md-1">
@@ -46,11 +46,11 @@
                             </select>
                         </div>
                         <div class="col-12 col-md-4 mb-2 mb-md-0">
-                            <input type="text" name="activities[0][description]" class="form-control" 
+                            <input type="text" name="activities[0][description]" class="form-control"
                                 placeholder="Deskripsi" required>
                         </div>
                         <div class="col-10 col-md-3 mb-2 mb-md-0">
-                            <input type="number" name="activities[0][amount]" class="form-control" 
+                            <input type="number" name="activities[0][amount]" class="form-control"
                                 placeholder="Jumlah Pelanggan" required>
                         </div>
                         <div class="col-2 col-md-1">
@@ -91,7 +91,7 @@
                                 </div>
                             </div>
                             <div class="col-10 col-md-4 mb-2 mb-md-0">
-                                <input type="text" name="offers[{{ $index }}][updates]" class="form-control" 
+                                <input type="text" name="offers[{{ $index }}][updates]" class="form-control"
                                     placeholder="Updates" value="{{ isset($dailyOffer->updates) ? implode(', ', $dailyOffer->updates) : '' }}">
                             </div>
                             <div class="col-2 col-md-1">
@@ -121,7 +121,7 @@
                                     @foreach($ads as $item)
                                         <option value="{{ $item['id'] }}"
                                             data-platform-id="{{ $item['platform']['id'] }}"
-                                            data-job-name="{{ $item['job']['job_name'] }}" 
+                                            data-job-name="{{ $item['job']['job_name'] }}"
                                             {{ isset($ad) && $ad->ads_id == $item['id'] ? 'selected' : '' }}>
                                             {{ $item['nomor_iklan'] }} - {{ $item['job']['job_name'] }} - {{ $item['platform']['platform_name'] }}
                                         </option>
@@ -133,12 +133,12 @@
                         </div>
                         <div class="form-group col-12 col-md-3 mb-2 mb-md-0">
                             <label for="lead_amount">Jumlah Lead</label>
-                            <input type="number" name="ads[{{ $index }}][lead_amount]" class="form-control" 
+                            <input type="number" name="ads[{{ $index }}][lead_amount]" class="form-control"
                                 value="{{ isset($ad) ? $ad->lead_amount : '' }}" placeholder="Contoh : 10">
                         </div>
                         <div class="form-group col-12 col-md-3">
                             <label for="total_omset">Total Closing</label>
-                            <input type="number" name="ads[{{ $index }}][total_omset]" class="form-control" 
+                            <input type="number" name="ads[{{ $index }}][total_omset]" class="form-control"
                                 value="{{ isset($ad) ? $ad->total_omset : '' }}" placeholder="Contoh : 150000">
                         </div>
                     </div>
@@ -177,8 +177,8 @@
             <h4 class="card-title">Agenda Besok</h4>
         </div>
         <div class="card-body">
-            <input type="text" name="agendas" class="form-control @error('agendas') is-invalid @enderror" 
-                value="{{ isset($report) && !empty($report->agendas) ? implode(', ', $report->agendas) : old('agendas') }}" 
+            <input type="text" name="agendas" class="form-control @error('agendas') is-invalid @enderror"
+                value="{{ isset($report) && !empty($report->agendas) ? implode(', ', $report->agendas) : old('agendas') }}"
                 placeholder="Contoh : Follow up customer, meeting dengan tim, dll.">
             <small class="form-text text-muted font-italic">*Pisahkan agenda kamu dengan tanda koma.</small>
             @error('agendas')
@@ -210,11 +210,11 @@
                         </select>
                     </div>
                     <div class="col-12 col-md-4 mb-2 mb-md-0">
-                        <input type="text" name="activities[${index}][description]" class="form-control" 
+                        <input type="text" name="activities[${index}][description]" class="form-control"
                             placeholder="Deskripsi" required>
                     </div>
                     <div class="col-10 col-md-3 mb-2 mb-md-0">
-                        <input type="number" name="activities[${index}][amount]" class="form-control" 
+                        <input type="number" name="activities[${index}][amount]" class="form-control"
                             placeholder="Jumlah Pelanggan" required>
                     </div>
                     <div class="col-2 col-md-1">
@@ -245,10 +245,6 @@
                             <div class="form-check me-md-3">
                                 <input type="checkbox" name="offers[${index}][is_prospect]" class="form-check-input">
                                 <label class="form-check-label">Hot Prospek</label>
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" name="offers[${index}][is_closing]" class="form-check-input">
-                                <label class="form-check-label">Sudah Closing</label>
                             </div>
                         </div>
                     </div>

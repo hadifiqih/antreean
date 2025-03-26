@@ -67,19 +67,19 @@ class DailySalesReportController extends Controller
     public function create()
     {
         $activityTypes = ActivityType::all();
+
         if(Auth::user()->role !== 'sales') {
-            $offers = Offer::where('is_closing', false)
-                ->whereDoesntHave('dailyOffers', function($query) {
+            $offers = Offer::whereDoesntHave('dailyOffers', function($query) {
                     $query->whereDate('created_at', date('Y-m-d'));
                 })
+                ->orderBy('created_at', 'desc')
                 ->get();
         }else{
-
             $offers = Offer::where('sales_id', Auth::user()->sales->id)
-                ->where('is_closing', false)
                 ->whereDoesntHave('dailyOffers', function($query) {
                     $query->whereDate('created_at', date('Y-m-d'));
                 })
+                ->orderBy('created_at', 'desc')
                 ->get();
         }
 
@@ -249,13 +249,11 @@ class DailySalesReportController extends Controller
                         'daily_report_id' => $report->id,
                         'offer_id' => $offer['id'],
                         'is_prospect' => isset($offer['is_prospect']) ? true : false,
-                        'is_closing' => isset($offer['is_closing']) ? true : false,
                         'updates' => $updates
                     ]);
 
                     Offer::where('id', $offer['id'])->update([
                         'updates' => $updates,
-                        'is_closing' => isset($offer['is_closing']) ? true : false,
                         'is_prospect' => isset($offer['is_prospect']) ? true : false
                     ]);
                 }
@@ -388,5 +386,31 @@ class DailySalesReportController extends Controller
         }
 
         return view('sales.reports.summary', compact('summary', 'salesList'));
+    }
+
+    public function unlock(Request $request, $report)
+    {
+        try {
+            $report = DailyReport::findOrFail($report);
+            $report->is_locked = false;
+            $report->save();
+
+            return back()->with('success', 'Laporan berhasil dibuka!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error unlocking report: ' . $e->getMessage());
+        }
+    }
+
+    public function lock(Request $request, $report)
+    {
+        try {
+            $report = DailyReport::findOrFail($report);
+            $report->is_locked = true;
+            $report->save();
+
+            return back()->with('success', 'Laporan berhasil dikunci!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error locking report: ' . $e->getMessage());
+        }
     }
 }

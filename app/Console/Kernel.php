@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('app:locked-laporan-harian')->dailyAt('21:05');
+        $schedule->command('app:locked-laporan-harian')->daily();
     }
 
     /**

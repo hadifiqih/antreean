@@ -28,7 +28,7 @@ class OfferController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
         }
-        
+
         return view('sales.offers.index', compact('offers'));
     }
 
@@ -75,7 +75,7 @@ class OfferController extends Controller
     public function update(Request $request, Offer $offer)
     {
         $this->authorize('update', $offer);
-        
+
         $request->validate([
             'job_id' => 'required|exists:jobs,id',
             'platform_id' => 'nullable|exists:platforms,id',
@@ -100,7 +100,7 @@ class OfferController extends Controller
     public function destroy(Offer $offer)
     {
         $this->authorize('delete', $offer);
-        
+
         if ($offer->dailyOffers()->exists()) {
             return back()->with('error', 'Cannot delete offer that is used in daily reports');
         }

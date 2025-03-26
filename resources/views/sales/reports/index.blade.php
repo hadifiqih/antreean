@@ -23,7 +23,7 @@
                         <a href="{{ route('sales.reports.summary') }}" class="btn btn-info mr-2">
                             <i class="fas fa-chart-bar"></i> Ringkasan
                         </a>
-                        @if(Auth::user()->role == 'sales')
+                        @if(Auth::user()->role == 'sales' && now()->format('H') < 21 && !$reports->where('created_at', '>=', now()->startOfDay())->count())
                         <a href="{{ route('sales.reports.create') }}" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Laporan Baru
                         </a>
@@ -57,15 +57,15 @@
                                                 {{ !request('sales_id') ? 'onclick="return false;"' : '' }}>
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            @if(Auth::user()->role == 'sales')
-                                                <a href="{{ route('sales.reports.edit', $report) }}" class="btn btn-sm btn-warning" title="Ubah">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form action="{{ route('sales.reports.destroy', $report) }}" method="POST" class="d-inline">
+                                            @if(Auth::user()->role === 'ceo' || Auth::user()->role === 'direktur')
+                                                <form action="{{ route('sales.reports.unlock', $report) }}" method="POST" class="d-inline">
                                                     @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin?')" title="Hapus">
-                                                        <i class="fas fa-trash"></i>
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-sm btn-{{ $report->is_locked ? 'primary' : 'secondary' }}"
+                                                            onclick="return confirm('Apakah Anda yakin ingin membuka kunci laporan ini?')"
+                                                            title="Buka Kunci"
+                                                            {{ $report->is_locked ? '' : 'disabled' }}>
+                                                        <i class="fas fa-{{ $report->is_locked ? 'lock' : 'unlock' }}"></i>
                                                     </button>
                                                 </form>
                                             @endif
@@ -84,19 +84,36 @@
                                         <td>{{ $report->activities->count() }} Aktivitas</td>
                                         <td>{{ $report->offers->count() }} Penawaran</td>
                                         <td>
+                                            @php
+                                                $isAfter9PM = now()->format('H') >= 21;
+                                                $isToday = $report->created_at->isToday();
+                                                $isLocked = $report->is_locked === 1;
+                                                $isDisabled = ($isAfter9PM || !$isToday) && $isLocked;
+                                            @endphp
+
                                             <a href="{{ route('sales.reports.show', $report) }}" class="btn btn-sm btn-info" title="Lihat">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('sales.reports.edit', $report) }}" class="btn btn-sm btn-warning" title="Ubah">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('sales.reports.destroy', $report) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin?')" title="Hapus">
+
+                                            @if(!$isDisabled)
+                                                <a href="{{ route('sales.reports.edit', $report) }}" class="btn btn-sm btn-warning" title="Ubah">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{{ route('sales.reports.destroy', $report) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin?')" title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <button class="btn btn-sm btn-warning" disabled title="Tidak dapat diubah">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" disabled title="Tidak dapat dihapus">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
-                                            </form>
+                                            @endif
                                         </td>
                                     </tr>
                                     @empty

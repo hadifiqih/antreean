@@ -1,18 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-@includeIf('partials.messages')
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12 mb-3">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Detail Pembayaran</h3>
-                    <div class="card-tools">
-                        <a href="{{ route('payments.index') }}" class="btn btn-sm btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </a>
-                    </div>
+                    <a href="{{ route('payments.index') }}" class="btn btn-sm btn-secondary float-end">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -20,10 +17,10 @@
                             <table class="table">
                                 <tr>
                                     <th>No. Order</th>
-                                    <td><a href="{{ route('antrian.estimator-produksi', $paymentTransaction->antrian->ticket_order) }}"> {{ $paymentTransaction->antrian->ticket_order }} <i class="fas fa-share"></i></a></td>
+                                    <td>{{ $paymentTransaction->antrian->ticket_order }}</td>
                                 </tr>
                                 <tr>
-                                    <th>Total Transaksi</th>
+                                    <th>Total Pembayaran</th>
                                     <td>Rp {{ number_format($paymentTransaction->total_amount, 0, ',', '.') }}</td>
                                 </tr>
                                 <tr>
@@ -33,13 +30,9 @@
                                 <tr>
                                     <th>Status</th>
                                     <td>
-                                        @if($paymentTransaction->payment_status === 'unpaid')
-                                            <span class="badge bg-warning">Belum Bayar</span>
-                                        @elseif($paymentTransaction->payment_status === 'partially_paid')
-                                            <span class="badge bg-info">Cicilan Sebagian</span>
-                                        @elseif($paymentTransaction->payment_status === 'paid')
-                                            <span class="badge bg-success">Lunas</span>
-                                        @endif
+                                        <span class="badge bg-{{ $paymentTransaction->payment_status === 'paid' ? 'success' : 'warning' }}">
+                                            {{ $paymentTransaction->payment_status === 'paid' ? 'Lunas' : 'Belum Lunas' }}
+                                        </span>
                                     </td>
                                 </tr>
                             </table>
@@ -53,12 +46,10 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Riwayat Pembayaran</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-sm btn-primary float-end" data-toggle="modal" data-target="#addInstallmentModal">
-                            <i class="fas fa-plus"></i> Tambah Pembayaran
-                        </button>
-                    </div>
+                    <h3 class="card-title">Riwayat Cicilan</h3>
+                    <button type="button" class="btn btn-sm btn-primary float-end" data-bs-toggle="modal" data-bs-target="#addInstallmentModal">
+                        <i class="fas fa-plus"></i> Tambah Cicilan
+                    </button>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -77,17 +68,17 @@
                                 <tr>
                                     <td>{{ $installment->created_at->format('d/m/Y') }}</td>
                                     <td>Rp {{ number_format($installment->amount, 0, ',', '.') }}</td>
-                                    <td>{{ ucwords($installment->payment_method) }}</td>
+                                    <td>{{ $installment->payment_method }}</td>
                                     <td>
-                                        <span class="bg-{{ $installment->validated_by != null ? 'success' : 'warning' }}">{{ $installment->validated_by != null ? 'Diverifikasi oleh' . $installment->validatedBy->name : 'Dalam Pengecekan' }}</span>
+                                        <span class="badge bg-{{ $installment->status === 'paid' ? 'success' : 'warning' }}">
+                                            {{ $installment->status }}
+                                        </span>
                                     </td>
                                     <td>
                                         @if($installment->proof_file)
-                                        <a href="{{ asset('storage/bukti-pembayaran/' . $installment->proof_file) }}" target="_blank" class="btn btn-sm btn-info">
+                                        <a href="{{ Storage::url($installment->proof_file) }}" target="_blank" class="btn btn-sm btn-info">
                                             <i class="fas fa-image"></i>
                                         </a>
-                                        @else
-                                        <span class="text-muted">Tidak ada bukti</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -104,12 +95,9 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Biaya Tambahan</h3>
-                    <div class="card-tools">
-                        <!-- Tombol Tambah Biaya -->
-                        <button type="button" class="btn btn-sm btn-primary float-end" data-toggle="modal" data-target="#addCostModal">
-                            <i class="fas fa-plus"></i> Tambah Biaya
-                        </button>
-                    </div>
+                    <button type="button" class="btn btn-sm btn-primary float-end" data-bs-toggle="modal" data-bs-target="#addCostModal">
+                        <i class="fas fa-plus"></i> Tambah Biaya
+                    </button>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -118,20 +106,15 @@
                                 <tr>
                                     <th>Nama Biaya</th>
                                     <th>Jumlah</th>
+                                    <th>Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($paymentTransaction->additionalCosts as $cost)
                                 <tr>
-                                    @php
-                                        $costName = [
-                                            'packing' => 'Biaya Packing',
-                                            'shipping' => 'Biaya Pengiriman',
-                                            'installation' => 'Biaya Pemasangan',
-                                        ];
-                                    @endphp
-                                    <td>{{ $costName[$cost->type] ?? $cost->type }}</td>
-                                    <td>Rp {{ number_format($cost->amount, 0, ',', '.') }}</td>
+                                    <td>{{ $cost->cost_name }}</td>
+                                    <td>Rp {{ number_format($cost->cost_amount, 0, ',', '.') }}</td>
+                                    <td>{{ $cost->cost_description }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -152,9 +135,7 @@
                 <input type="hidden" name="payment_transaction_id" value="{{ $paymentTransaction->id }}">
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Cicilan</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -174,7 +155,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
@@ -191,31 +172,24 @@
                 <input type="hidden" name="payment_transaction_id" value="{{ $paymentTransaction->id }}">
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Biaya</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Tipe Biaya</label>
-                        <select class="form-control" name="type" required>
-                            <option value="" disabled selected>Pilih Jenis Biaya</option>
-                            <option value="packing">Biaya Packing</option>
-                            <option value="shipping">Biaya Pengiriman</option>
-                            <option value="installation">Biaya Pemasangan</option>
-                        </select>
+                        <label class="form-label">Nama Biaya</label>
+                        <input type="text" class="form-control" name="cost_name" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Jumlah</label>
-                        <input type="number" class="form-control" name="amount" required>
+                        <input type="number" class="form-control" name="cost_amount" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Keterangan</label>
-                        <textarea class="form-control" name="description" rows="3"></textarea>
+                        <textarea class="form-control" name="cost_description" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>

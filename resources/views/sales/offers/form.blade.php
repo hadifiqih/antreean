@@ -44,7 +44,7 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label for="price">Harga</label>
-                <input type="number" name="price" id="price" class="form-control rupiah-input @error('price') is-invalid @enderror" 
+                <input type="number" name="price" id="price" class="form-control rupiah-input @error('price') is-invalid @enderror"
                     value="{{ old('price', isset($offer) ? $offer->price : '') }}" style="width: 100%" required>
                 @error('price')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -55,7 +55,7 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label for="qty">Quantity</label>
-                <input type="number" name="qty" id="qty" class="form-control @error('qty') is-invalid @enderror" 
+                <input type="number" name="qty" id="qty" class="form-control @error('qty') is-invalid @enderror"
                     value="{{ old('qty', isset($offer) ? $offer->qty : '') }}">
                 @error('qty')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -66,7 +66,7 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label for="total">Total</label>
-                <input type="number" name="total" id="total" class="form-control rupiah-input @error('total') is-invalid @enderror" 
+                <input type="number" name="total" id="total" class="form-control rupiah-input @error('total') is-invalid @enderror"
                     value="{{ old('total', isset($offer) ? $offer->total : '') }}">
                 @error('total')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -79,14 +79,6 @@
         <label for="description">Deskripsi</label>
         <textarea name="description" id="description" rows="3" class="form-control @error('description') is-invalid @enderror">{{ old('description', isset($offer) ? $offer->description : '') }}</textarea>
         @error('description')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-
-    <div class="form-group">
-        <label for="updates">Updates</label>
-        <textarea name="updates" id="updates" rows="3" class="form-control @error('updates') is-invalid @enderror" placeholder="Pisahkan setiap update dengan tanda koma, contoh:Dalam Pengajuan, Closing">{{ old('updates', isset($offer) ? implode(', ', (array)$offer->updates) : '') }}</textarea>
-        @error('updates')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
@@ -113,7 +105,7 @@
             placeholder: 'Select Job',
             allowClear: true
         });
-        
+
         $('#platform_id').select2({
             placeholder: 'Select Platform (optional)',
             allowClear: true

@@ -331,6 +331,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{report}/edit', [DailySalesReportController::class, 'edit'])->name('edit');
         Route::put('/{report}', [DailySalesReportController::class, 'update'])->name('update');
         Route::delete('/{report}', [DailySalesReportController::class, 'destroy'])->name('destroy');
+        Route::patch('/{report}/unlocked', [DailySalesReportController::class, 'unlock'])->name('unlock');
+        Route::patch('/{report}/locked', [DailySalesReportController::class, 'lock'])->name('lock');
     });
 
     // Offers
