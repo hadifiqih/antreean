@@ -12,7 +12,6 @@ class DailyOffer extends Model
     protected $fillable = ['daily_report_id', 'offer_id', 'is_prospect', 'updates'];
 
     protected $casts = [
-        'is_prospect' => 'boolean',
         'updates' => 'array'
     ];
 

@@ -18,10 +18,6 @@ class AdsReport extends Model
         'kendala'
     ];
 
-    protected $casts = [
-        'updates' => 'array',
-    ];
-
     public function dailyReport()
     {
         return $this->belongsTo(DailyReport::class, 'daily_report_id', 'id');

@@ -142,7 +142,7 @@ class DailySalesReportController extends Controller
 
             // Store ads reports
             if ($request->has('ads')) {
-                foreach ($request->ads as $index => $adsData) {
+                foreach ($request->ads as $adsData) {
                     AdsReport::create([
                         'daily_report_id' => $report->id,
                         'ads_id' => $adsData['ads_id'],
@@ -157,7 +157,7 @@ class DailySalesReportController extends Controller
             }
 
             DB::commit();
-            return back()->with('success', 'Daily report created successfully');
+            return redirect()->route('sales.reports.index')->with('success', 'Daily report created successfully');
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Error creating report: ' . $e->getMessage());
@@ -218,8 +218,9 @@ class DailySalesReportController extends Controller
         return view('sales.reports.edit', compact('report', 'activityTypes', 'offers', 'ads', 'adsReports'));
     }
 
-    public function update(Request $request, DailyReport $report)
+    public function update(Request $request, $report)
     {
+        $report = DailyReport::findOrFail($report);
         DB::beginTransaction();
         try {
             $report->update([
@@ -241,12 +242,14 @@ class DailySalesReportController extends Controller
             // Update offers
             $report->offers()->delete();
             if ($request->has('offers')) {
+                $updates = isset($offer['updates']) ? explode(',', $offer['updates']) : null;
+
                 foreach ($request->offers as $offer) {
                     DailyOffer::create([
                         'daily_report_id' => $report->id,
                         'offer_id' => $offer['id'],
                         'is_prospect' => isset($offer['is_prospect']) ? true : false,
-                        'updates' => $offer['updates'] ?? null
+                        'updates' => $updates
                     ]);
                 }
             }
@@ -254,7 +257,7 @@ class DailySalesReportController extends Controller
             // Update ads reports
             $report->adsReports()->delete();
             if ($request->has('ads')) {
-                foreach ($request->ads as $index => $adsData) {
+                foreach ($request->ads as $adsData) {
                     AdsReport::create([
                         'daily_report_id' => $report->id,
                         'ads_id' => $adsData['ads_id'],
