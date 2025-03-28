@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use App\Models\DailyActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use App\Http\Requests\DailyReportRequest;
 
 class DailySalesReportController extends Controller
@@ -26,7 +27,13 @@ class DailySalesReportController extends Controller
 
     public function index(Request $request)
     {
-        $query = DailyReport::with(['activities.activityType', 'offers.offer', 'sales']);
+        $query = DailyReport::with(['activities.activityType', 'sales']);
+
+        $offers = Offer::whereDoesntHave('dailyOffers', function($query) {
+                $query->whereDate('created_at', date('Y-m-d'));
+            })
+            ->orderBy('created_at', 'desc')
+            ->count();
 
         if (Auth::user()->role === 'sales') {
             $query->where('sales_id', Auth::user()->sales->id);
@@ -42,7 +49,8 @@ class DailySalesReportController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $antrians = Antrian::when(Auth::user()->role == 'sales', function($query) {
+        $antrians = Antrian::with(['sales'])
+            ->when(Auth::user()->role == 'sales', function($query) {
                 return $query->where('sales_id', Auth::user()->sales->id);
             })
             ->when($request->sales_id, function($query) use ($request) {
@@ -55,13 +63,15 @@ class DailySalesReportController extends Controller
             ->get()
             ->keyBy('date');
 
+        $omsets = $antrians->pluck('daily_omset', 'date')->toArray();
+
         // Get all sales for filter
         $salesList = [];
         if (Auth::user()->role !== 'sales') {
             $salesList = Sales::with('user')->get();
         }
 
-        return view('sales.reports.index', compact('reports', 'antrians', 'salesList'));
+        return view('sales.reports.index', compact('reports', 'antrians', 'salesList', 'omsets', 'offers'));
     }
 
     public function create()
@@ -124,20 +134,6 @@ class DailySalesReportController extends Controller
                     'description' => $activity['description'],
                     'amount' => $activity['amount']
                 ]);
-            }
-
-            // Store offers
-            if ($request->has('offers')) {
-                foreach ($request->offers as $offer) {
-                    $updates = isset($offer['updates']) ? explode(',', $offer['updates']) : null;
-
-                    DailyOffer::create([
-                        'daily_report_id' => $report->id,
-                        'offer_id' => $offer['id'],
-                        'is_prospect' => isset($offer['is_prospect']) ? true : false,
-                        'updates' => $updates
-                    ]);
-                }
             }
 
             // Store ads reports
@@ -237,21 +233,6 @@ class DailySalesReportController extends Controller
                     'description' => $activity['description'],
                     'amount' => $activity['amount']
                 ]);
-            }
-
-            // Update offers
-            $report->offers()->delete();
-            if ($request->has('offers')) {
-                $updates = isset($offer['updates']) ? explode(',', $offer['updates']) : null;
-
-                foreach ($request->offers as $offer) {
-                    DailyOffer::create([
-                        'daily_report_id' => $report->id,
-                        'offer_id' => $offer['id'],
-                        'is_prospect' => isset($offer['is_prospect']) ? true : false,
-                        'updates' => $updates
-                    ]);
-                }
             }
 
             // Update ads reports
@@ -406,6 +387,24 @@ class DailySalesReportController extends Controller
             return back()->with('success', 'Laporan berhasil dikunci!');
         } catch (\Exception $e) {
             return back()->with('error', 'Error locking report: ' . $e->getMessage());
+        }
+    }
+
+    private function getOmsetRetail($id)
+    {
+        $client = new Client();
+
+        try {
+            $response = $client->request('GET', config('services.api_url_antrian') . '/api/retail/sales/' . $id, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . env('API_TOKEN')
+                ]
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }

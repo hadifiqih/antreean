@@ -333,6 +333,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{report}', [DailySalesReportController::class, 'destroy'])->name('destroy');
         Route::patch('/{report}/unlocked', [DailySalesReportController::class, 'unlock'])->name('unlock');
         Route::patch('/{report}/locked', [DailySalesReportController::class, 'lock'])->name('lock');
+        Route::get('/{report}/get-omset', [DailySalesReportController::class, 'getOmset'])->name('getOmset');
     });
 
     // Offers
@@ -344,6 +345,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{offer}/edit', [OfferController::class, 'edit'])->name('edit');
             Route::put('/{offer}', [OfferController::class, 'update'])->name('update');
             Route::delete('/{offer}', [OfferController::class, 'destroy'])->name('destroy');
+            Route::patch('/{offer}/close', [OfferController::class, 'close'])->name('close');
         });
     });
 });

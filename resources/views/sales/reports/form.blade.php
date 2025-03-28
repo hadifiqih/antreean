@@ -65,48 +65,6 @@
 
     <div class="card mt-4">
         <div class="card-header">
-            <h4 class="card-title">Penawaran</h4>
-        </div>
-        <div class="card-body">
-            <div id="offers-container">
-                @if(isset($report))
-                    @foreach($report->offers as $index => $dailyOffer)
-                        <div class="row offer-row mb-3">
-                            <div class="col-12 col-md-4 mb-2 mb-md-0">
-                                <select name="offers[{{ $index }}][id]" class="form-control" required>
-                                    @foreach($offers as $offer)
-                                        <option value="{{ $offer->id }}" {{ $dailyOffer->offer_id == $offer->id ? 'selected' : '' }}>
-                                            {{ $offer->job->job_name }} - Rp{{ number_format($offer->price, 0) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-3 mb-2 mb-md-0">
-                                <div class="d-flex flex-column flex-md-row gap-2">
-                                    <div class="form-check me-md-3">
-                                        <input type="checkbox" name="offers[{{ $index }}][is_prospect]" class="form-check-input"
-                                            {{ $dailyOffer->is_prospect ? 'checked' : '' }}>
-                                        <label class="form-check-label">Hot Prospek</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-10 col-md-4 mb-2 mb-md-0">
-                                <input type="text" name="offers[{{ $index }}][updates]" class="form-control"
-                                    placeholder="Updates" value="{{ isset($dailyOffer->updates) ? implode(', ', $dailyOffer->updates) : '' }}">
-                            </div>
-                            <div class="col-2 col-md-1">
-                                <button type="button" class="btn btn-danger w-100 remove-offer">×</button>
-                            </div>
-                        </div>
-                    @endforeach
-                @endif
-            </div>
-            <button type="button" class="btn btn-success" id="add-offer">Tambah Penawaran</button>
-        </div>
-    </div>
-
-    <div class="card mt-4">
-        <div class="card-header">
             <h4 class="card-title">Iklan</h4>
         </div>
         <div class="card-body">
@@ -225,40 +183,6 @@
             $('#activities-container').append(template);
         });
 
-        // Add new offer row
-        $('#add-offer').click(function() {
-            const index = $('.offer-row').length;
-            const template = `
-                <div class="row offer-row mb-3">
-                    <div class="col-12 col-md-4 mb-2 mb-md-0">
-                        <select name="offers[${index}][id]" class="form-control" required>
-                            <option value="">Pilih Penawaran</option>
-                            @foreach($offers as $offer)
-                                <option value="{{ $offer->id }}">
-                                    {{ $offer->job->job_name }} - Rp{{ number_format($offer->price, 0) }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3 mb-2 mb-md-0">
-                        <div class="d-flex flex-column flex-md-row gap-2">
-                            <div class="form-check me-md-3">
-                                <input type="checkbox" name="offers[${index}][is_prospect]" class="form-check-input">
-                                <label class="form-check-label">Hot Prospek</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-10 col-md-4 mb-2 mb-md-0">
-                        <input type="text" name="offers[${index}][updates]" class="form-control" placeholder="Updates">
-                    </div>
-                    <div class="col-2 col-md-1">
-                        <button type="button" class="btn btn-danger w-100 remove-offer">×</button>
-                    </div>
-                </div>
-            `;
-            $('#offers-container').append(template);
-        });
-
         // Add new ads row
         $('#add-ads').click(function() {
             const index = $('.iklan-container .row').length / 2; // Since each ad has 2 rows
@@ -308,11 +232,6 @@
         // Remove activity row
         $(document).on('click', '.remove-activity', function() {
             $(this).closest('.activity-row').remove();
-        });
-
-        // Remove offer row
-        $(document).on('click', '.remove-offer', function() {
-            $(this).closest('.offer-row').remove();
         });
 
         // Remove ads row

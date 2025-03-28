@@ -49,7 +49,7 @@
                                         <td>{{ $report->created_at->format('d M Y') }}</td>
                                         <td>Rp {{ number_format($antrians->get($report->created_at->format('Y-m-d'))?->daily_omset ?? 0 ,0, ',', '.') }}</td>
                                         <td>{{ $report->activities->count() }} Aktivitas</td>
-                                        <td>{{ $report->offers->count() }} Penawaran</td>
+                                        <td>{{ $offers }} Penawaran</td>
                                         <td>
                                             <a href="{{ route('sales.reports.show', $report) }}"
                                                 class="btn btn-sm btn-info {{ !request('sales_id') ? 'disabled' : '' }}"

@@ -6,6 +6,7 @@ use App\Models\Job;
 use App\Models\Offer;
 use App\Models\Platform;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class OfferController extends Controller
@@ -21,12 +22,12 @@ class OfferController extends Controller
             $offers = Offer::with(['job', 'sales', 'platform'])
             ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get();
         }else {
             $offers = Offer::with(['job', 'sales', 'platform'])
             ->where('sales_id', Auth::user()->sales->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->get();
         }
 
         return view('sales.offers.index', compact('offers'));
@@ -74,8 +75,6 @@ class OfferController extends Controller
 
     public function update(Request $request, Offer $offer)
     {
-        $this->authorize('update', $offer);
-
         $request->validate([
             'job_id' => 'required|exists:jobs,id',
             'platform_id' => 'nullable|exists:platforms,id',
@@ -108,5 +107,20 @@ class OfferController extends Controller
         $offer->delete();
         return redirect()->route('sales.offers.index')
             ->with('success', 'Offer deleted successfully');
+    }
+
+    public function close(Request $request, $offer)
+    {
+        $request->validate([
+            'antrian_ticket_order' => 'required|string'
+        ]);
+
+        $offer = Offer::findOrFail($offer);
+        $offer->antrian_ticket_order = $request->antrian_ticket_order;
+        $offer->save();
+
+        Log::info('Offer closed: ' . $offer->id . ' by user: ' . Auth::user()->id);
+
+        return back()->with('success', 'Penawaran berhasil di-closing');
     }
 }
